@@ -122,7 +122,7 @@ class NDExNdextcgaloaderLoader(object):
         self._pass = None
         self._server = None
         self._ndex = None
-
+        self._net_summaries = None
         self._networklistfile = args.networklistfile
         self._datadir = os.path.abspath(args.datadir)
 
@@ -161,6 +161,18 @@ class NDExNdextcgaloaderLoader(object):
             self._ndex = Ndex2(host=self._server, username=self._user,
                                password=self._pass, user_agent=self._get_user_agent())
 
+    def _load_network_summaries_for_user(self):
+        """
+        Gets a dictionary of all networks for user account
+        <network name upper cased> => <NDEx UUID>
+        :return: dict
+        """
+        net_summaries = self._ndex.get_network_summaries_for_user(self._user)
+        self._net_summaries = {}
+        for nk in net_summaries:
+            if nk.get('name') is not None:
+                self._net_summaries[nk.get('name').upper()] = nk.get('externalId')
+
     def run(self):
         """
         Runs content loading for NDEx TCGA Content Loader
@@ -170,6 +182,7 @@ class NDExNdextcgaloaderLoader(object):
         self._parse_config()
         self._parse_load_plan()
         self._create_ndex_connection()
+        self._load_network_summaries_for_user()
 
         for entry in os.listdir(self._datadir):
             if not entry.endswith('.txt'):
@@ -181,6 +194,43 @@ class NDExNdextcgaloaderLoader(object):
 
         return 0
 
+    def _remove_edges_to_node(self, network, edge_id_list):
+        """
+        Removes edges pointing to node
+        :param network:
+        :param node_id:
+        :return:
+        """
+        for edge_id in edge_id_list:
+            network.remove_edge(edge_id)
+            e_attrib = network.get_edge_attributes(edge_id)
+            if e_attrib is None:
+                continue
+
+            for edge_attrs in e_attrib:
+                network.remove_edge_attribute(edge_attrs['@id'])
+
+    def _remove_nan_nodes(self, network):
+        """
+        Removes nodes named nan and any edges to those nodes
+        :param network:
+        :return: None
+        """
+        edge_id_list = []
+        node_id_list = []
+        for id, node in network.get_nodes():
+            if node['n'] == 'nan':
+                node_id_list.append(id)
+                for edge_id, edge_obj in network.get_edges():
+                    if edge_obj['s'] == id or edge_obj['t'] == id:
+                        edge_id_list.append(edge_id)
+
+        if len(edge_id_list) > 0:
+            self._remove_edges_to_node(network, edge_id_list)
+        if len(node_id_list) > 0:
+            for id in node_id_list:
+                network.remove_node(id)
+
     def _process_file(self, file_name):
         """PRocesses  a file"""
         df, node_lines, node_fields = self._get_pandas_dataframe(file_name)
@@ -188,11 +238,18 @@ class NDExNdextcgaloaderLoader(object):
             return
         network = t2n.convert_pandas_to_nice_cx_with_load_plan(df, self._loadplan)
 
+        self._remove_nan_nodes(network)
         network.set_name(os.path.basename(file_name).replace('.txt', ''))
 
-        upload_message = network.upload_to(self._server, self._user,
-                                           self._pass,
-                                           user_agent=self._get_user_agent())
+        network_update_key = self._net_summaries.get(network.get_name().upper())
+
+        if network_update_key is not None:
+            return network.update_to(network_update_key, self._server, self._user, self._pass,
+                                     user_agent=self._get_user_agent())
+        else:
+            upload_message = network.upload_to(self._server, self._user,
+                                               self._pass,
+                                               user_agent=self._get_user_agent())
         return upload_message
 
     def _download_data_files(self):
@@ -278,6 +335,7 @@ class NDExNdextcgaloaderLoader(object):
         df_with_a_b = df_with_a_b.astype(str)
 
         df_with_a_b['NODE_TYPE'] = df_with_a_b['NODE_TYPE'].map(NODE_TYPE_MAPPING, na_action='ignore')
+        df_with_a_b['NODE_TYPE_B'] = df_with_a_b['NODE_TYPE_B'].map(NODE_TYPE_MAPPING, na_action='ignore')
 
         with open(path_to_file + '_with_a_b.csv', 'w') as f:
             f.write(df_with_a_b.to_csv(sep=','))
