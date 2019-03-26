@@ -9,6 +9,9 @@ import pandas as pd
 from logging import config
 from ndexutil.config import NDExUtilConfig
 import ndextcgaloader
+import ndexutil.tsv.tsv2nicecx2 as t2n
+from ndex2.client import Ndex2
+import ndex2
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +21,8 @@ LOG_FORMAT = "%(asctime)-15s %(levelname)s %(relativeCreated)dms " \
              "%(filename)s::%(funcName)s():%(lineno)d %(message)s"
 
 DEFAULT_URL = 'https://raw.githubusercontent.com/iVis-at-Bilkent/pathway-mapper/master/samples'
+
+NODE_TYPE_MAPPING = {'GENE': 'protein'}
 
 def _parse_arguments(desc, args):
     """
@@ -116,6 +121,8 @@ class NDExNdextcgaloaderLoader(object):
         self._user = None
         self._pass = None
         self._server = None
+        self._ndex = None
+
         self._networklistfile = args.networklistfile
         self._datadir = os.path.abspath(args.datadir)
 
@@ -138,6 +145,22 @@ class NDExNdextcgaloaderLoader(object):
         with open(self._args.loadplan, 'r') as f:
             self._loadplan = json.load(f)
 
+    def _get_user_agent(self):
+        """
+
+        :return:
+        """
+        return 'tcga/' + self._args.version
+
+    def _create_ndex_connection(self):
+        """
+        creates connection to ndex
+        :return:
+        """
+        if self._ndex is None:
+            self._ndex = Ndex2(host=self._server, username=self._user,
+                               password=self._pass, user_agent=self._get_user_agent())
+
     def run(self):
         """
         Runs content loading for NDEx TCGA Content Loader
@@ -146,13 +169,31 @@ class NDExNdextcgaloaderLoader(object):
         """
         self._parse_config()
         self._parse_load_plan()
+        self._create_ndex_connection()
+
         for entry in os.listdir(self._datadir):
+            if not entry.endswith('.txt'):
+                continue
             fp = os.path.join(self._datadir, entry)
             if not os.path.isfile(fp):
                 continue
-            self._get_pandas_dataframe(entry)
+            self._process_file(fp)
 
         return 0
+
+    def _process_file(self, file_name):
+        """PRocesses  a file"""
+        df, node_lines, node_fields = self._get_pandas_dataframe(file_name)
+        if df is None:
+            return
+        network = t2n.convert_pandas_to_nice_cx_with_load_plan(df, self._loadplan)
+
+        network.set_name(os.path.basename(file_name).replace('.txt', ''))
+
+        upload_message = network.upload_to(self._server, self._user,
+                                           self._pass,
+                                           user_agent=self._get_user_agent())
+        return upload_message
 
     def _download_data_files(self):
         """
@@ -212,23 +253,36 @@ class NDExNdextcgaloaderLoader(object):
 
         edge_df = pd.DataFrame.from_records(edge_rows_tuples, columns=edge_fields)
 
-        logger.info('Edge data frame:\n' + str(edge_df))
+        logger.debug('Edge data frame:\n' + str(edge_df))
         node_df = pd.DataFrame.from_records(node_rows_tuples, columns=node_fields)
-        logger.info('Node data frame:\n' + str(node_df))
-        df_with_a = edge_df.join(node_df.set_index('NODE_ID'), on='SOURCE')
-        df_with_b = edge_df.join(node_df.set_index('NODE_ID'), on='TARGET')
-        logger.info('Node data frame A:\n' + str(df_with_a))
-        logger.info('Node data frame B:\n' + str(df_with_b))
 
-        df_with_a_b = df_with_a.join(df_with_b.set_index('--NODE_NAME'), on='--NODE_NAME', lsuffix='_A',
-                                     rsuffix='_B')
-        logger.info('Node data frame A and B:\n' + str(df_with_a_b))
-        #df_with_a_b = df_with_a_b.replace('\n', '', regex=True)
-        #df_with_a_b['PARTICIPANT_A'] = df_with_a_b['PARTICIPANT_A'].map(lambda x: x.lstrip('[').rstrip(']'))
-        #df_with_a_b['PARTICIPANT_B'] = df_with_a_b['PARTICIPANT_B'].map(lambda x: x.lstrip('[').rstrip(']'))
-        sys.exit(1)
-        return None
-        #return df_with_a_b, node_lines, node_fields
+        id_to_gene_dict = {}
+
+        for idx, row in node_df.iterrows():
+            id_to_gene_dict[row.NODE_ID] = row[0]
+
+        node_df.rename(index=str, columns={'--NODE_NAME': 'NODE'}, inplace=True)
+        # node_df['PARENT_ID'] = node_df['PARENT_ID'].map(id_to_gene_dict, na_action='ignore')
+
+        edge_df['SOURCE'] = edge_df['SOURCE'].map(id_to_gene_dict, na_action='ignore')
+        edge_df['TARGET'] = edge_df['TARGET'].map(id_to_gene_dict, na_action='ignore')
+
+        edge_df.rename(index=str,
+                       columns={'EDGE_TYPEINTERACTION_PUBMED_ID': 'EDGE_TYPE'},
+                       inplace=True)
+
+        df_with_a = edge_df.join(node_df.set_index('NODE'), on='SOURCE', how='outer')
+
+        df_with_a_b = df_with_a.join(node_df.set_index('NODE'), on='TARGET',
+                                     rsuffix='_B', how='left')
+        df_with_a_b = df_with_a_b.astype(str)
+
+        df_with_a_b['NODE_TYPE'] = df_with_a_b['NODE_TYPE'].map(NODE_TYPE_MAPPING, na_action='ignore')
+
+        with open(path_to_file + '_with_a_b.csv', 'w') as f:
+            f.write(df_with_a_b.to_csv(sep=','))
+
+        return df_with_a_b, node_lines, node_fields
 
 
 def main(args):
