@@ -22,7 +22,9 @@ LOG_FORMAT = "%(asctime)-15s %(levelname)s %(relativeCreated)dms " \
 
 DEFAULT_URL = 'https://raw.githubusercontent.com/iVis-at-Bilkent/pathway-mapper/master/samples'
 
-NODE_TYPE_MAPPING = {'GENE': 'protein'}
+NODE_TYPE_MAPPING = {'GENE': 'protein',
+                     'FAMILY': 'proteinfamily',
+                     'COMPLEX': 'complexqq'}
 
 def _parse_arguments(desc, args):
     """
