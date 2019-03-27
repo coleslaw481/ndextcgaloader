@@ -22,9 +22,18 @@ LOG_FORMAT = "%(asctime)-15s %(levelname)s %(relativeCreated)dms " \
 
 DEFAULT_URL = 'https://raw.githubusercontent.com/iVis-at-Bilkent/pathway-mapper/master/samples'
 
+# Simple dictionary mapping values in type field to
+# normalized values
 NODE_TYPE_MAPPING = {'GENE': 'protein',
                      'FAMILY': 'proteinfamily',
-                     'COMPLEX': 'complexqq'}
+                     'COMPLEX': 'complex'}
+
+# name of CX aspect that contains coordinates for nodes
+CARTESIANLAYOUT_ASPECT_NAME = 'cartesianLayout'
+
+POSX_NODE_ATTR = 'POSX'
+POSY_NODE_ATTR = 'POSY'
+
 
 def _parse_arguments(desc, args):
     """
@@ -77,6 +86,8 @@ def _parse_arguments(desc, args):
                                                   'to the networks to download'
                                                   'from URL set in --dataurl',
                         required=True)
+    parser.add_argument('--style', help='Path to NDEx CX file to use for styling'
+                                        'networks', required=True)
     parser.add_argument('--version', action='version',
                         version=('%(prog)s ' +
                                  ndextcgaloader.__version__))
@@ -127,6 +138,7 @@ class NDExNdextcgaloaderLoader(object):
         self._net_summaries = None
         self._networklistfile = args.networklistfile
         self._datadir = os.path.abspath(args.datadir)
+        self._template = None
 
     def _parse_config(self):
             """
@@ -175,6 +187,13 @@ class NDExNdextcgaloaderLoader(object):
             if nk.get('name') is not None:
                 self._net_summaries[nk.get('name').upper()] = nk.get('externalId')
 
+    def _load_style_template(self):
+        """
+        Loads the CX network specified by self._args.style into self._template
+        :return:
+        """
+        self._template = ndex2.create_nice_cx_from_file(os.path.abspath(self._args.style))
+
     def run(self):
         """
         Runs content loading for NDEx TCGA Content Loader
@@ -185,6 +204,7 @@ class NDExNdextcgaloaderLoader(object):
         self._parse_load_plan()
         self._create_ndex_connection()
         self._load_network_summaries_for_user()
+        self._load_style_template()
 
         for entry in os.listdir(self._datadir):
             if not entry.endswith('.txt'):
@@ -233,6 +253,32 @@ class NDExNdextcgaloaderLoader(object):
             for id in node_id_list:
                 network.remove_node(id)
 
+    def _add_coordinates_aspect_from_pos_attributes(self, network):
+        """
+        Iterates through all nodes in network looking for
+        POSX and POSY node attributes. These values are then
+        put into the CARTESIAN_LAYOUT aspect. Finally these
+        attributes are removed from the nodes
+        :return:
+        """
+        coordlist = []
+        for id, node in network.get_nodes():
+            posx = network.get_node_attribute(id, POSX_NODE_ATTR)
+            if posx is None:
+                logger.debug('No position attribute for node: ' + str(node))
+                continue
+            posy = network.get_node_attribute(id, POSY_NODE_ATTR)
+            if posy is None:
+                logger.debug('No position y attribute for node: ' + str(node) +
+                             ' which is weird cause we got an X position')
+                continue
+            coordlist.append({'node': id, 'x': float(posx['v']), 'y': float(posy['v'])})
+            network.remove_node_attribute(id, POSX_NODE_ATTR)
+            network.remove_node_attribute(id, POSY_NODE_ATTR)
+        if len(coordlist) > 0:
+            network.set_opaque_aspect(CARTESIANLAYOUT_ASPECT_NAME,
+                                      coordlist)
+
     def _process_file(self, file_name):
         """PRocesses  a file"""
         df, node_lines, node_fields = self._get_pandas_dataframe(file_name)
@@ -241,9 +287,13 @@ class NDExNdextcgaloaderLoader(object):
         network = t2n.convert_pandas_to_nice_cx_with_load_plan(df, self._loadplan)
 
         self._remove_nan_nodes(network)
+        self._add_coordinates_aspect_from_pos_attributes(network)
         network.set_name(os.path.basename(file_name).replace('.txt', ''))
 
         network_update_key = self._net_summaries.get(network.get_name().upper())
+
+        # apply style to network
+        network.apply_style_from_network(self._template)
 
         if network_update_key is not None:
             return network.update_to(network_update_key, self._server, self._user, self._pass,
@@ -284,7 +334,6 @@ class NDExNdextcgaloaderLoader(object):
             lines.append(line)
             lines.extend(f.readlines())
 
-        logger.info('lines: ' + str(lines))
         mode = "node"
         edge_lines = []
         edge_rows_tuples = []
@@ -312,7 +361,6 @@ class NDExNdextcgaloaderLoader(object):
 
         edge_df = pd.DataFrame.from_records(edge_rows_tuples, columns=edge_fields)
 
-        logger.debug('Edge data frame:\n' + str(edge_df))
         node_df = pd.DataFrame.from_records(node_rows_tuples, columns=node_fields)
 
         id_to_gene_dict = {}
@@ -338,9 +386,12 @@ class NDExNdextcgaloaderLoader(object):
 
         df_with_a_b['NODE_TYPE'] = df_with_a_b['NODE_TYPE'].map(NODE_TYPE_MAPPING, na_action='ignore')
         df_with_a_b['NODE_TYPE_B'] = df_with_a_b['NODE_TYPE_B'].map(NODE_TYPE_MAPPING, na_action='ignore')
+        df_with_a_b['EDGE_TYPE'] = df_with_a_b['EDGE_TYPE'].str.lower()
 
-        with open(path_to_file + '_with_a_b.csv', 'w') as f:
-            f.write(df_with_a_b.to_csv(sep=','))
+        # for debugging this writes the data frame generated to a file
+        # in same directory input tsv files are located
+        # with open(path_to_file + '_with_a_b.csv', 'w') as f:
+        #    f.write(df_with_a_b.to_csv(sep='\t'))
 
         return df_with_a_b, node_lines, node_fields
 
