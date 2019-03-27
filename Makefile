@@ -87,6 +87,10 @@ dist: clean ## builds source and wheel package
 	python setup.py bdist_wheel
 	ls -l dist
 
+installwheel: dist ## builds whl file and installs it via pip
+	pip uninstall ndextcgaloader -y
+	pip install dist/ndextcgaloader-*.whl
+
 install: clean ## install the package to the active Python's site-packages
 	python setup.py install
 
