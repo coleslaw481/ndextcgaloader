@@ -12,6 +12,7 @@ import ndextcgaloader
 import ndexutil.tsv.tsv2nicecx2 as t2n
 from ndex2.client import Ndex2
 import ndex2
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -139,6 +140,8 @@ class NDExNdextcgaloaderLoader(object):
         self._networklistfile = args.networklistfile
         self._datadir = os.path.abspath(args.datadir)
         self._template = None
+        self._failed_networks = []
+
 
     def _parse_config(self):
             """
@@ -206,13 +209,13 @@ class NDExNdextcgaloaderLoader(object):
         self._load_network_summaries_for_user()
         self._load_style_template()
 
-        for entry in os.listdir(self._datadir):
-            if not entry.endswith('.txt'):
-                continue
-            fp = os.path.join(self._datadir, entry)
-            if not os.path.isfile(fp):
-                continue
-            self._process_file(fp)
+        with open(self._networklistfile, 'r') as networks:
+            list_of_network_files = networks.read().splitlines()
+
+        self._download_data_files(DEFAULT_URL, list_of_network_files, self._datadir)
+
+        for network_file in list_of_network_files:
+            self._process_file(network_file)
 
         return 0
 
@@ -304,11 +307,58 @@ class NDExNdextcgaloaderLoader(object):
                                                user_agent=self._get_user_agent())
         return upload_message
 
-    def _download_data_files(self):
+    def _handle_error(self, network_name):
+        print('unable to get network {}'.format(network_name))
+        self._failed_networks.append(network_name)
+
+    def _download_data_files(self, tcga_github_repo_url, list_of_networks, output_directory=os.getcwd()):
+        """ Downloads data files to temp directory
+
+        This function takes three arguments: URL of repository, list of networks and working directory.
+        It downloades all networks specified in list_of_networks from tcga_github_repo_url and
+        saves them in output_directory.
+
+        Args:
+            tcga_github_repo_url (required): URL of TCGA networks, it is
+                https://raw.githubusercontent.com/iVis-at-Bilkent/pathway-mapper/master/samples/
+
+            list_of_networks (required): List of networks in tcga_github_repo_url that need to be downloaded.
+                Example of list_of_networks = [
+                        'ACC-2016-WNT-signaling-pathway.txt',
+                        'BLCA-2014-Histone-modification-pathway.txt',
+                        'BLCA-2014-RTK-RAS-PI(3)K-pathway.tx'
+                    ]
+
+            output_directory (optional; defaults to current working dir):
+                directory on local machine where files from tcga_github_repo_url will be saved,
+                Example: '/Users/joe/tcga'
+
+        Returns:
+            none
         """
-        Downloads data files to temp directory
-        :return:
-        """
+
+        if not os.path.exists(output_directory):
+            os.makedirs(output_directory)
+
+        for network in list_of_networks:
+            try:
+                response = requests.get(os.path.join(tcga_github_repo_url, network))
+
+                if response.status_code // 100 == 2:
+
+                    with open(os.path.join(output_directory, network), "w") as received_file:
+                        received_file.write(response.content.decode('utf-8-sig'))
+                else:
+                    self._handle_error(network)
+
+            except requests.exceptions.RequestException as e:
+                self._handle_error(network)
+
+        # print list of networks that we failed to download (if any)
+        if (self._failed_networks):
+            print('failed to receive {} networks:'.format(len(self._failed_networks)))
+            for network_name in self._failed_networks:
+                print(network_name)
 
     def _get_pandas_dataframe(self, file_name):
         """
@@ -371,6 +421,11 @@ class NDExNdextcgaloaderLoader(object):
         node_df.rename(index=str, columns={'--NODE_NAME': 'NODE'}, inplace=True)
         # node_df['PARENT_ID'] = node_df['PARENT_ID'].map(id_to_gene_dict, na_action='ignore')
 
+
+        # for all nodes where column NODE is empty and NODE_TYPE column is 'FAMILY', set
+        # value of NODE to "unnamed family"
+        node_df.loc[(node_df['NODE'] == '') & (node_df['NODE_TYPE'] == 'FAMILY'), "NODE"] = "unnamed family"
+
         edge_df['SOURCE'] = edge_df['SOURCE'].map(id_to_gene_dict, na_action='ignore')
         edge_df['TARGET'] = edge_df['TARGET'].map(id_to_gene_dict, na_action='ignore')
 
@@ -406,20 +461,20 @@ def main(args):
     Version {version}
 
     Loads NDEx TCGA Content Loader data into NDEx (http://ndexbio.org).
-    
+
     To connect to NDEx server a configuration file must be passed
-    into --conf parameter. If --conf is unset the configuration 
-    the path ~/{confname} is examined. 
-         
+    into --conf parameter. If --conf is unset the configuration
+    the path ~/{confname} is examined.
+
     The configuration file should be formatted as follows:
-         
+
     [<value in --profile (default ncipid)>]
-         
+
     {user} = <NDEx username>
     {password} = <NDEx password>
     {server} = <NDEx server(omit http) ie public.ndexbio.org>
-    
-    
+
+
     """.format(confname=NDExUtilConfig.CONFIG_FILE,
                user=NDExUtilConfig.USER,
                password=NDExUtilConfig.PASSWORD,
