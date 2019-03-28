@@ -305,6 +305,12 @@ class NDExNdextcgaloaderLoader(object):
           '<i>Cell</i>, Volume 173, Issue 2, 5 April 2018, Pages 321-337.e10 <br>' +
           '<a target="_blank" href="https://doi.org/10.1016/j.cell.2018.03.035">doi: 10.1016/j.cell.2018.03.035</a>')
 
+        network.set_network_attribute("author",
+          'Francisco Sanchez-Vega, Marco Mina, Joshua Armenia, Walid K.Chatila, Augustin Luna, Konnor C.La, ' +
+          'Sofia Dimitriadoy, David L.Liu, Havish S.Kantheti, Sadegh Saghafinia, Debyani Chakravarty, ' +
+          'Foysal Daian, Qingsong Gao, Matthew H.Bailey, Wen-Wei Liang, Steven M.Foltz, Ilya Shmulevich, ' +
+          'Li Ding, Nikolaus Schultz')
+
         network.set_network_attribute("organism", "Human, 9606, Homo sapiens")
 
     def _process_file(self, file_name):
