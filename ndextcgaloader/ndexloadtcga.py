@@ -283,6 +283,14 @@ class NDExNdextcgaloaderLoader(object):
             network.set_opaque_aspect(CARTESIANLAYOUT_ASPECT_NAME,
                                       coordlist)
 
+    def _set_network_attributes(self, network, network_description):
+
+        if network_description:
+            network.set_network_attribute("description", network_description)
+
+        network.set_network_attribute("prov:wasGeneratedBy", "ndextcgaloader " + ndextcgaloader.__version__)
+
+
     def _process_file(self, file_name):
         """Processes  a file"""
         df, node_lines, node_fields, network_description = self._get_pandas_dataframe(file_name)
@@ -293,8 +301,8 @@ class NDExNdextcgaloaderLoader(object):
         self._remove_nan_nodes(network)
         self._add_coordinates_aspect_from_pos_attributes(network)
         network.set_name(os.path.basename(file_name).replace('.txt', ''))
-        if network_description:
-            network.set_network_attribute("description", network_description)
+
+        self._set_network_attributes(network, network_description)
 
         network_update_key = self._net_summaries.get(network.get_name().upper())
 
