@@ -290,6 +290,11 @@ class NDExNdextcgaloaderLoader(object):
 
         network.set_network_attribute("prov:wasGeneratedBy", "ndextcgaloader " + ndextcgaloader.__version__)
 
+        network.set_network_attribute("reference",
+          'Istemi Bahceci, Ugur Dogrusoz, Konnor C La, Özgün Babur, Jianjiong Gao, Nikolaus Schultz ' +
+          '<b>PathwayMapper: a collaborative visual web editor for cancer pathways and genomic data.</b><br>' +
+          '<i>Bioinformatics</i>, Volume 33, Issue 14, 15 July 2017, Pages 2238–2240, ' +
+          '<a target="_blank" href="https://doi.org/10.1093/bioinformatics/btx149">doi.org/10.1093/bioinformatics/btx149</a>')
 
     def _process_file(self, file_name):
         """Processes  a file"""
