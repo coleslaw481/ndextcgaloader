@@ -290,11 +290,22 @@ class NDExNdextcgaloaderLoader(object):
 
         network.set_network_attribute("prov:wasGeneratedBy", "ndextcgaloader " + ndextcgaloader.__version__)
 
+        #network.set_network_attribute("reference",
+        #  'Istemi Bahceci, Ugur Dogrusoz, Konnor C La, Özgün Babur, Jianjiong Gao, Nikolaus Schultz ' +
+        #  '<b>PathwayMapper: a collaborative visual web editor for cancer pathways and genomic data.</b><br>' +
+        #  '<i>Bioinformatics</i>, Volume 33, Issue 14, 15 July 2017, Pages 2238–2240, ' +
+        #  '<a target="_blank" href="https://doi.org/10.1093/bioinformatics/btx149">doi.org/10.1093/bioinformatics/btx149</a>')
+
         network.set_network_attribute("reference",
-          'Istemi Bahceci, Ugur Dogrusoz, Konnor C La, Özgün Babur, Jianjiong Gao, Nikolaus Schultz ' +
-          '<b>PathwayMapper: a collaborative visual web editor for cancer pathways and genomic data.</b><br>' +
-          '<i>Bioinformatics</i>, Volume 33, Issue 14, 15 July 2017, Pages 2238–2240, ' +
-          '<a target="_blank" href="https://doi.org/10.1093/bioinformatics/btx149">doi.org/10.1093/bioinformatics/btx149</a>')
+          'Francisco Sanchez-Vega, Marco Mina, Joshua Armenia, Walid K.Chatila, Augustin Luna, Konnor C.La, ' +
+          'Sofia Dimitriadoy, David L.Liu, Havish S.Kantheti, Sadegh Saghafinia, Debyani Chakravarty, ' +
+          'Foysal Daian, Qingsong Gao, Matthew H.Bailey, Wen-Wei Liang, Steven M.Foltz, Ilya Shmulevich, ' +
+          'Li Ding, ... Nikolaus Schultz<br> ' +
+          '<b>Oncogenic Signaling Pathways in The Cancer Genome Atlas</b><br>' +
+          '<i>Cell</i>, Volume 173, Issue 2, 5 April 2018, Pages 321-337.e10 <br>' +
+          '<a target="_blank" href="https://doi.org/10.1016/j.cell.2018.03.035">doi: 10.1016/j.cell.2018.03.035</a>')
+
+        network.set_network_attribute("organism", "Human, 9606, Homo sapiens")
 
     def _process_file(self, file_name):
         """Processes  a file"""
