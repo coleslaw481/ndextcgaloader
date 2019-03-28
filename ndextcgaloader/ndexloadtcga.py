@@ -211,6 +211,7 @@ class NDExNdextcgaloaderLoader(object):
 
         with open(self._networklistfile, 'r') as networks:
             list_of_network_files = networks.read().splitlines()
+            list_of_network_files.reverse()
 
         self._download_data_files(DEFAULT_URL, list_of_network_files, self._datadir)
 
@@ -283,8 +284,8 @@ class NDExNdextcgaloaderLoader(object):
                                       coordlist)
 
     def _process_file(self, file_name):
-        """PRocesses  a file"""
-        df, node_lines, node_fields = self._get_pandas_dataframe(file_name)
+        """Processes  a file"""
+        df, node_lines, node_fields, network_description = self._get_pandas_dataframe(file_name)
         if df is None:
             return
         network = t2n.convert_pandas_to_nice_cx_with_load_plan(df, self._loadplan)
@@ -292,6 +293,8 @@ class NDExNdextcgaloaderLoader(object):
         self._remove_nan_nodes(network)
         self._add_coordinates_aspect_from_pos_attributes(network)
         network.set_name(os.path.basename(file_name).replace('.txt', ''))
+        if network_description:
+            network.set_network_attribute("description", network_description)
 
         network_update_key = self._net_summaries.get(network.get_name().upper())
 
@@ -375,12 +378,19 @@ class NDExNdextcgaloaderLoader(object):
         reached_header = False
         lines = []
         logger.info('Examining file: ' + path_to_file)
+        current_line_no = 0;
+        network_description = ''
         # read file into lines list skipping the starting
         # lines before --NODE_NAME entry
         with open(path_to_file, 'r') as f:
             for line in f:
+                current_line_no += 1
                 if line.startswith('--NODE_NAME'):
                     break
+                else:
+                    if (current_line_no > 1) and len(line.strip()) > 0:
+                        network_description += line
+
             lines.append(line)
             lines.extend(f.readlines())
 
@@ -448,7 +458,7 @@ class NDExNdextcgaloaderLoader(object):
         # with open(path_to_file + '_with_a_b.csv', 'w') as f:
         #    f.write(df_with_a_b.to_csv(sep='\t'))
 
-        return df_with_a_b, node_lines, node_fields
+        return df_with_a_b, node_lines, node_fields, network_description
 
 
 def main(args):
