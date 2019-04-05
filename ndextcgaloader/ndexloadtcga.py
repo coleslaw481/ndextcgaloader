@@ -14,6 +14,10 @@ from ndex2.client import Ndex2
 import ndex2
 import requests
 
+import re
+
+import numpy as np
+
 logger = logging.getLogger(__name__)
 
 TSV2NICECXMODULE = 'ndexutil.tsv.tsv2nicecx2'
@@ -27,7 +31,9 @@ DEFAULT_URL = 'https://raw.githubusercontent.com/iVis-at-Bilkent/pathway-mapper/
 # normalized values
 NODE_TYPE_MAPPING = {'GENE': 'protein',
                      'FAMILY': 'proteinfamily',
-                     'COMPLEX': 'complex'}
+                     'COMPLEX': 'complex',
+                     'PROCESS': 'process' # PROCESS is not in vocabulary, so we keep it as is
+                     }
 
 # name of CX aspect that contains coordinates for nodes
 CARTESIANLAYOUT_ASPECT_NAME = 'cartesianLayout'
@@ -393,6 +399,73 @@ class NDExNdextcgaloaderLoader(object):
             for network_name in self._failed_networks:
                 print(network_name)
 
+    def _generate_member_node_attribute(self, df):
+        l = df.tolist()
+        lisf_of_gene_names_with_prefix = []
+        for element in l:
+            if element == 'nan':
+                continue
+
+            if bool(re.match('^[A-Za-z-0-9_]+(\@)?$', element)):
+                lisf_of_gene_names_with_prefix.append('hgnc.symbol:' + element)
+            else:
+                lisf_of_gene_names_with_prefix.append(element)
+
+        # lisf_of_gene_names_with_prefix = ['hgnc:' + element for element in my_df.tolist()]
+        return '|'.join(lisf_of_gene_names_with_prefix)
+
+    def _add_member_properties(self, df):
+        added_parent_id_column_added = False
+        added_parent_id_column_b_added = False
+
+        type_complex_or_proteinfamily = []
+        type_complex_or_proteinfamily.append(NODE_TYPE_MAPPING['FAMILY'])
+        type_complex_or_proteinfamily.append(NODE_TYPE_MAPPING['COMPLEX'])
+
+        for idx, row in df.iterrows():
+            if row['NODE_TYPE'] in type_complex_or_proteinfamily:
+                if not added_parent_id_column_added:
+                    added_parent_id_column_added = True
+                    df['MEMBER'] = ''
+                    break
+
+        if added_parent_id_column_added:
+            for idx, row in df.iterrows():
+                if row['NODE_TYPE'] in type_complex_or_proteinfamily:
+                    member_node_id = row['NODE_ID']
+                    my_df = df[(df['PARENT_ID'] == member_node_id)]['SOURCE']
+
+                    member_node_attribute = self._generate_member_node_attribute(my_df)
+
+                    if member_node_attribute:
+                        row['MEMBER'] = member_node_attribute
+
+
+        for idx, row in df.iterrows():
+            if row['NODE_TYPE_B'] in type_complex_or_proteinfamily:
+                if not added_parent_id_column_b_added:
+                    added_parent_id_column_b_added = True
+                    df['MEMBER_B'] = ''
+                    break
+
+        if added_parent_id_column_b_added:
+            for idx, row in df.iterrows():
+                member_node_id = row['NODE_ID_B']
+
+                if member_node_id == '':
+                    continue
+
+                # get a list of all target node names with the same id as PARENT_ID_B
+                my_df_b = df[(df['PARENT_ID_B'] == member_node_id)]['TARGET']
+
+                member_node_attribute = self._generate_member_node_attribute(my_df_b)
+
+                if member_node_attribute:
+                    row['MEMBER_B'] = member_node_attribute
+
+        return added_parent_id_column_added, added_parent_id_column_b_added
+
+
     def _get_pandas_dataframe(self, file_name):
         """
         Gets pandas data frame from file
@@ -434,6 +507,11 @@ class NDExNdextcgaloaderLoader(object):
         for index in range(len(lines)):
             line = lines[index]
             if index is 0:
+                if line.startswith('--'):
+                    line = line[2:]
+                line = line.strip('\n')
+                if line.endswith('--'):
+                    line = line[0:-2]
                 node_fields = [h.strip() for h in line.split('\t')]
             elif line == '\n':
                 mode = "edge_header"
@@ -458,7 +536,8 @@ class NDExNdextcgaloaderLoader(object):
         for idx, row in node_df.iterrows():
             id_to_gene_dict[row.NODE_ID] = row[0]
 
-        node_df.rename(index=str, columns={'--NODE_NAME': 'NODE'}, inplace=True)
+        node_df.rename(index=str, columns={'NODE_NAME': 'NODE'}, inplace=True)
+        edge_df.rename(index=str, columns={'--EDGE_ID': 'EDGE_ID'}, inplace=True)
         # node_df['PARENT_ID'] = node_df['PARENT_ID'].map(id_to_gene_dict, na_action='ignore')
 
 
@@ -466,27 +545,62 @@ class NDExNdextcgaloaderLoader(object):
         # value of NODE to "unnamed family"
         node_df.loc[(node_df['NODE'] == '') & (node_df['NODE_TYPE'] == 'FAMILY'), "NODE"] = "unnamed family"
 
-        edge_df['SOURCE'] = edge_df['SOURCE'].map(id_to_gene_dict, na_action='ignore')
-        edge_df['TARGET'] = edge_df['TARGET'].map(id_to_gene_dict, na_action='ignore')
-
         edge_df.rename(index=str,
                        columns={'EDGE_TYPEINTERACTION_PUBMED_ID': 'EDGE_TYPE'},
                        inplace=True)
 
-        df_with_a = edge_df.join(node_df.set_index('NODE'), on='SOURCE', how='outer')
+        #edge_df.set_index('EDGE_ID')
+        df_with_a = edge_df.join(node_df.set_index('NODE_ID'), on='SOURCE', how='inner')
+        df_with_b = edge_df.join(node_df.set_index('NODE_ID'), on='TARGET', how='inner')
 
-        df_with_a_b = df_with_a.join(node_df.set_index('NODE'), on='TARGET',
-                                     rsuffix='_B', how='left')
+
+        df_with_b = df_with_b.drop(columns=['SOURCE', 'TARGET', 'EDGE_TYPE'])
+        df_with_b.rename(index=str, columns={'NODE':'NODE_ID_B'}, inplace=True)
+        df_with_b.rename(index=str, columns={'NODE_TYPE':'NODE_TYPE_B'}, inplace=True)
+        df_with_b.rename(index=str, columns={'PARENT_ID': 'PARENT_ID_B'}, inplace=True)
+        df_with_b.rename(index=str, columns={'POSX': 'POSX_B'}, inplace=True)
+        df_with_b.rename(index=str, columns={'POSY': 'POSY_B'}, inplace=True)
+
+        df_with_a_b = df_with_a.join(df_with_b.set_index('EDGE_ID'), on='EDGE_ID', how='right')
         df_with_a_b = df_with_a_b.astype(str)
 
         df_with_a_b['NODE_TYPE'] = df_with_a_b['NODE_TYPE'].map(NODE_TYPE_MAPPING, na_action='ignore')
         df_with_a_b['NODE_TYPE_B'] = df_with_a_b['NODE_TYPE_B'].map(NODE_TYPE_MAPPING, na_action='ignore')
         df_with_a_b['EDGE_TYPE'] = df_with_a_b['EDGE_TYPE'].str.lower()
 
+        df_with_a_b['NODE'] = df_with_a_b['SOURCE']
+        df_with_a_b['NODE_ID_B'] = df_with_a_b['TARGET']
+
+        df_with_a_b['SOURCE'] = edge_df['SOURCE'].map(id_to_gene_dict, na_action='ignore')
+        df_with_a_b['TARGET'] = edge_df['TARGET'].map(id_to_gene_dict, na_action='ignore')
+
+        df_with_a_b.rename(index=str, columns={'NODE': 'NODE_ID'}, inplace=True)
+
+        df_with_a_b['NODE_TYPE'].fillna('other', inplace=True)
+        #df_with_a_b['NODE_TYPE_B'].fillna('other', inplace=True)
+
+
+        nodes_with_edges_ids = set()
+        for index, row in df_with_a_b.iterrows():
+            nodes_with_edges_ids.add(row['NODE_ID'])
+            nodes_with_edges_ids.add(row['NODE_ID_B'])
+
+        node_df_without_edges = node_df[~node_df['NODE_ID'].isin(nodes_with_edges_ids)]
+        node_df_without_edges['NODE_TYPE'] = node_df_without_edges['NODE_TYPE'].map(NODE_TYPE_MAPPING, na_action='ignore')
+
+        node_df_without_edges.rename(index=str, columns={'NODE': 'SOURCE'}, inplace=True)
+
+        for index, row in node_df_without_edges.iterrows():
+            df_with_a_b = df_with_a_b.append(row, ignore_index=True)  # Moving
+
+        df_with_a_b = df_with_a_b.replace(np.nan, '', regex=True)
+
+        add_parent_id_column, add_parent_id_column_b = self._add_member_properties(df_with_a_b)
+
         # for debugging this writes the data frame generated to a file
         # in same directory input tsv files are located
-        # with open(path_to_file + '_with_a_b.csv', 'w') as f:
-        #    f.write(df_with_a_b.to_csv(sep='\t'))
+        with open(path_to_file + '_with_a_b.tsv', 'w') as f:
+            f.write(df_with_a_b.to_csv(sep='\t'))
 
         return df_with_a_b, node_lines, node_fields, network_description
 
@@ -530,6 +644,7 @@ def main(args):
         return loader.run()
     except Exception as e:
         logger.exception('Caught exception')
+        print('\n\n\tException: {}\n'.format(e))
         return 2
     finally:
         logging.shutdown()

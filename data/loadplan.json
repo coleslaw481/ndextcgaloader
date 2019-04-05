@@ -5,7 +5,8 @@
         "uniprot": "http://identifiers.org/uniprot/",
         "cas": "http://identifiers.org/cas/",
         "kegg.compound": "http://identifiers.org/kegg.compound/",
-        "hprd": "http://identifiers.org/hprd/"
+        "hprd": "http://identifiers.org/hprd/",
+        "hgnc": "http://identifiers.org/hgnc.symbol/"
     },
     "source_plan":
     {
@@ -13,15 +14,24 @@
         "property_columns": [
              {
                   "column_name": "NODE_TYPE",
-                  "attribute_name": "type"
+                  "attribute_name": "type",
+                  "data_type": "string"
              },
             {
                   "column_name": "POSX",
-                  "attribute_name": "POSX"
+                  "attribute_name": "POSX",
+                  "data_type": "integer"
             },
             {
-                  "column_name": "POSY--",
-                  "attribute_name": "POSY"
+                  "column_name": "POSY",
+                  "attribute_name": "POSY",
+                  "data_type": "integer"
+            },
+            {
+                 "column_name": "MEMBER",
+                 "attribute_name": "Member",
+                 "data_type": "list_of_string",
+                 "delimiter" : "|"
             }
         ]
     },
@@ -32,6 +42,12 @@
              {
                   "column_name": "NODE_TYPE_B",
                   "attribute_name": "type"
+             },
+             {
+                 "column_name": "MEMBER_B",
+                 "attribute_name": "Member",
+                 "data_type": "list_of_string",
+                 "delimiter" : "|"
              }
         ]
     },
