@@ -44,6 +44,16 @@
                   "attribute_name": "type"
              },
              {
+                  "column_name": "POSX_B",
+                  "attribute_name": "POSX",
+                  "data_type": "integer"
+             },
+            {
+                  "column_name": "POSY_B",
+                  "attribute_name": "POSY",
+                  "data_type": "integer"
+            },
+             {
                  "column_name": "MEMBER_B",
                  "attribute_name": "Member",
                  "data_type": "list_of_string",

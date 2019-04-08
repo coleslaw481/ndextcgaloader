@@ -41,6 +41,10 @@ CARTESIANLAYOUT_ASPECT_NAME = 'cartesianLayout'
 POSX_NODE_ATTR = 'POSX'
 POSY_NODE_ATTR = 'POSY'
 
+POSX_B_NODE_ATTR = 'POSX_B'
+POSY_B_NODE_ATTR = 'POSY_B'
+
+
 
 def _parse_arguments(desc, args):
     """
@@ -275,13 +279,19 @@ class NDExNdextcgaloaderLoader(object):
         for id, node in network.get_nodes():
             posx = network.get_node_attribute(id, POSX_NODE_ATTR)
             if posx is None:
-                logger.debug('No position attribute for node: ' + str(node))
-                continue
+                posx = network.get_node_attribute(id, POSX_B_NODE_ATTR)
+                if posx is None:
+                    logger.debug('No position attribute for node: ' + str(node))
+                    continue
+
             posy = network.get_node_attribute(id, POSY_NODE_ATTR)
+
             if posy is None:
-                logger.debug('No position y attribute for node: ' + str(node) +
-                             ' which is weird cause we got an X position')
-                continue
+                posy = network.get_node_attribute(id, POSY_B_NODE_ATTR)
+                if posy is None:
+                    logger.debug('No position y attribute for node: ' + str(node) +
+                                 ' which is weird cause we got an X position')
+                    continue
             coordlist.append({'node': id, 'x': float(posx['v']), 'y': float(posy['v'])})
             network.remove_node_attribute(id, POSX_NODE_ATTR)
             network.remove_node_attribute(id, POSY_NODE_ATTR)
