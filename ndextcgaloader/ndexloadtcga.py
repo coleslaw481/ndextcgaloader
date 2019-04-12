@@ -32,7 +32,8 @@ DEFAULT_URL = 'https://raw.githubusercontent.com/iVis-at-Bilkent/pathway-mapper/
 NODE_TYPE_MAPPING = {'GENE': 'protein',
                      'FAMILY': 'proteinfamily',
                      'COMPLEX': 'complex',
-                     'PROCESS': 'process' # PROCESS is not in vocabulary, so we keep it as is
+                     'PROCESS': 'process', # PROCESS is not in vocabulary, so we keep it as is
+                     'COMPARTMENT': 'compartment' # COMPARTMENT is not in vocabulary, so we keep it as is
                      }
 
 # name of CX aspect that contains coordinates for nodes
@@ -330,11 +331,26 @@ class NDExNdextcgaloaderLoader(object):
         network.set_network_attribute("organism", "Human, 9606, Homo sapiens")
 
     def _process_file(self, file_name):
+
+        id_to_gene_dict = {}
         """Processes  a file"""
-        df, node_lines, node_fields, network_description = self._get_pandas_dataframe(file_name)
+        df, network_description, id_to_gene_dict = self._get_pandas_dataframe(file_name)
         if df is None:
             return
+
+        # replace node names with IDs before transforming Panda dataframe to Nice CX;
+        # this is done because as of the moment of writing convert_pandas_to_nice_cx_with_load_plan() cannot
+        # handle frames with multiple nodes with the same name; so we use unique IDs instead
+        for idx, row in df.iterrows():
+            row['SOURCE'] = row['NODE_ID']
+            row['TARGET'] = row['NODE_ID_B']
+
         network = t2n.convert_pandas_to_nice_cx_with_load_plan(df, self._loadplan)
+
+        # now, replace 'name' and 'represents' in network with names
+        for id, node in network.get_nodes():
+            node['n'] = id_to_gene_dict[node['n']]
+            node['r'] = id_to_gene_dict[node['r']]
 
         self._remove_nan_nodes(network)
         self._add_coordinates_aspect_from_pos_attributes(network)
@@ -409,20 +425,21 @@ class NDExNdextcgaloaderLoader(object):
             for network_name in self._failed_networks:
                 print(network_name)
 
-    def _generate_member_node_attribute(self, df):
+    def _generate_member_node_attributes(self, df):
         l = df.tolist()
-        lisf_of_gene_names_with_prefix = []
+        set_of_gene_names_with_prefix = set()
         for element in l:
             if element == 'nan':
                 continue
 
             if bool(re.match('^[A-Za-z-0-9_]+(\@)?$', element)):
-                lisf_of_gene_names_with_prefix.append('hgnc.symbol:' + element)
+                set_of_gene_names_with_prefix.add('hgnc.symbol:' + element)
             else:
-                lisf_of_gene_names_with_prefix.append(element)
+                set_of_gene_names_with_prefix.add(element)
 
         # lisf_of_gene_names_with_prefix = ['hgnc:' + element for element in my_df.tolist()]
-        return '|'.join(lisf_of_gene_names_with_prefix)
+        return set_of_gene_names_with_prefix
+
 
     def _add_member_properties(self, df):
         added_parent_id_column_added = False
@@ -440,16 +457,25 @@ class NDExNdextcgaloaderLoader(object):
                     break
 
         if added_parent_id_column_added:
+            member_node_attributes_set = set()
+
             for idx, row in df.iterrows():
                 if row['NODE_TYPE'] in type_complex_or_proteinfamily:
                     member_node_id = row['NODE_ID']
+
                     my_df = df[(df['PARENT_ID'] == member_node_id)]['SOURCE']
+                    member_node_attributes = self._generate_member_node_attributes(my_df)
+                    member_node_attributes_set.update(member_node_attributes)
 
-                    member_node_attribute = self._generate_member_node_attribute(my_df)
+                    my_df_b = df[(df['PARENT_ID_B'] == member_node_id)]['TARGET']
+                    member_node_attributes = self._generate_member_node_attributes(my_df_b)
+                    member_node_attributes_set.update(member_node_attributes)
 
-                    if member_node_attribute:
-                        row['MEMBER'] = member_node_attribute
+                    if member_node_attributes_set:
+                        mem = '|'.join(member_node_attributes_set)
+                        row['MEMBER'] = mem
 
+                    member_node_attributes_set.clear()
 
         for idx, row in df.iterrows():
             if row['NODE_TYPE_B'] in type_complex_or_proteinfamily:
@@ -459,19 +485,26 @@ class NDExNdextcgaloaderLoader(object):
                     break
 
         if added_parent_id_column_b_added:
+            member_node_attributes_set = set()
+
             for idx, row in df.iterrows():
-                member_node_id = row['NODE_ID_B']
+                if row['NODE_TYPE_B'] in type_complex_or_proteinfamily:
+                    member_node_id = row['NODE_ID_B']
 
-                if member_node_id == '':
-                    continue
+                    # get a list of all target node names with the same id as PARENT_ID_B
+                    my_df_b = df[(df['PARENT_ID_B'] == member_node_id)]['TARGET']
+                    member_node_attributes = self._generate_member_node_attributes(my_df_b)
+                    member_node_attributes_set.update(member_node_attributes)
 
-                # get a list of all target node names with the same id as PARENT_ID_B
-                my_df_b = df[(df['PARENT_ID_B'] == member_node_id)]['TARGET']
+                    my_df_b = df[(df['PARENT_ID'] == member_node_id)]['SOURCE']
+                    member_node_attributes = self._generate_member_node_attributes(my_df_b)
+                    member_node_attributes_set.update(member_node_attributes)
 
-                member_node_attribute = self._generate_member_node_attribute(my_df_b)
+                    if member_node_attributes_set:
+                        mem = '|'.join(member_node_attributes_set)
+                        row['MEMBER_B'] = mem
 
-                if member_node_attribute:
-                    row['MEMBER_B'] = member_node_attribute
+                    member_node_attributes_set.clear()
 
         return added_parent_id_column_added, added_parent_id_column_b_added
 
@@ -612,7 +645,7 @@ class NDExNdextcgaloaderLoader(object):
         with open(path_to_file + '_with_a_b.tsv', 'w') as f:
             f.write(df_with_a_b.to_csv(sep='\t'))
 
-        return df_with_a_b, node_lines, node_fields, network_description
+        return df_with_a_b, network_description, id_to_gene_dict
 
 
 def main(args):
