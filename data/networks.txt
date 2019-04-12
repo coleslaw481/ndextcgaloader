@@ -59,7 +59,7 @@ SKCM-2015-Histone-modification-pathway.txt
 SKCM-2015-RTK-RAS-PI(3)K-pathway.txt
 SKCM-2015-TP53-pathway.txt
 STAD-2014-RTK-RAS-PI(3)K-pathway.txt
-Schaub-MYC-pathway.txt
+Schaub-MYC-pathway..txt
 TGF-Beta.txt
 THCA-2014-RTK-RAS-PI(3)K-pathway.txt
 TP53.txt
