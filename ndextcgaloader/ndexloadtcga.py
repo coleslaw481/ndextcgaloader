@@ -583,9 +583,6 @@ class NDExNdextcgaloaderLoader(object):
         edge_df.rename(index=str, columns={'--EDGE_ID': 'EDGE_ID'}, inplace=True)
         # node_df['PARENT_ID'] = node_df['PARENT_ID'].map(id_to_gene_dict, na_action='ignore')
 
-        # drop duplicate edges: edges that have the same source, target and type need to be removed
-        edge_df.drop_duplicates(subset=['SOURCE', 'TARGET', 'EDGE_TYPE'], keep='first', inplace=True)
-
 
         # for all nodes where column NODE is empty and NODE_TYPE column is 'FAMILY', set
         # value of NODE to "unnamed family"
@@ -594,6 +591,9 @@ class NDExNdextcgaloaderLoader(object):
         edge_df.rename(index=str,
                        columns={'EDGE_TYPEINTERACTION_PUBMED_ID': 'EDGE_TYPE'},
                        inplace=True)
+
+        # drop duplicate edges: edges that have the same source, target and type need to be removed
+        edge_df.drop_duplicates(subset=['SOURCE', 'TARGET', 'EDGE_TYPE'], keep='first', inplace=True)
 
         #edge_df.set_index('EDGE_ID')
         df_with_a = edge_df.join(node_df.set_index('NODE_ID'), on='SOURCE', how='inner')
