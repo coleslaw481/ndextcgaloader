@@ -121,6 +121,7 @@ Three files are needed to run this script: **loadplan.json**, **networks.txt** a
 For example:
 
 .. code-block::
+
    ndexloadtcga.py --loadplan ./data/loadplan.json --networklistfile ./data/networks.txt --style ./data/style.cx 
 
 Usage
@@ -133,6 +134,7 @@ In addition to the three required files listed in the previous section, we need 
 The entire command is thus
 
 .. code-block::
+
  ndexloadtcga.py --loadplan <loadplan> --networklistfile <networks file> --style <style> --profile <profile> -datadir <datadir>
 
 **Example usage**
