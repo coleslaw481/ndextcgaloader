@@ -44,7 +44,7 @@ Installation
 
 .. code-block::
 
-   git clone https://github.com/coleslaw481/ndextcgaloader
+   https://github.com/vrynkov/ndextcgaloader.git
    cd ndextcgaloader
    make dist
    pip install dist/ndextcgaloader*whl
