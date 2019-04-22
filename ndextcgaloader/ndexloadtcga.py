@@ -153,6 +153,8 @@ class NDExNdextcgaloaderLoader(object):
         self._template = None
         self._failed_networks = []
 
+        #self._networks_in_cx_dir = 'networks_in_cx'
+
 
     def _parse_config(self):
             """
@@ -372,6 +374,16 @@ class NDExNdextcgaloaderLoader(object):
                                                user_agent=self._get_user_agent())
         return upload_message
 
+        #path_to_networks_in_cx = self._networks_in_cx_dir
+        #if not os.path.exists(path_to_networks_in_cx):
+        #    os.makedirs(path_to_networks_in_cx)
+
+        #full_network_in_cx_path = path_to_networks_in_cx + '/' + network.get_name() + '.cx'
+        #with open(full_network_in_cx_path, 'w') as f:
+        #    json.dump(network.to_cx(), f, indent=4)
+
+        #return
+
     def _handle_error(self, network_name):
         print('unable to get network {}'.format(network_name))
         self._failed_networks.append(network_name)
@@ -448,6 +460,7 @@ class NDExNdextcgaloaderLoader(object):
         type_complex_or_proteinfamily = []
         type_complex_or_proteinfamily.append(NODE_TYPE_MAPPING['FAMILY'])
         type_complex_or_proteinfamily.append(NODE_TYPE_MAPPING['COMPLEX'])
+        type_complex_or_proteinfamily.append(NODE_TYPE_MAPPING['COMPARTMENT'])
 
         for idx, row in df.iterrows():
             if row['NODE_TYPE'] in type_complex_or_proteinfamily:
@@ -472,8 +485,7 @@ class NDExNdextcgaloaderLoader(object):
                     member_node_attributes_set.update(member_node_attributes)
 
                     if member_node_attributes_set:
-                        mem = '|'.join(member_node_attributes_set)
-                        row['MEMBER'] = mem
+                        row['MEMBER'] = '|'.join(sorted(member_node_attributes_set))
 
                     member_node_attributes_set.clear()
 
@@ -501,12 +513,71 @@ class NDExNdextcgaloaderLoader(object):
                     member_node_attributes_set.update(member_node_attributes)
 
                     if member_node_attributes_set:
-                        mem = '|'.join(member_node_attributes_set)
-                        row['MEMBER_B'] = mem
+                        row['MEMBER_B'] = '|'.join(sorted(member_node_attributes_set))
 
                     member_node_attributes_set.clear()
 
         return added_parent_id_column_added, added_parent_id_column_b_added
+
+
+    def _create_names_for_unnamed_nodes(self, df, id_to_gene_dict,
+                                        node_type_param, source_param, member_param, node_id_param):
+        '''
+        :param df:
+        :param id_to_gene_dict:
+        :param node_type_param: NODE_TYPE or NODE_TYPE_B
+        :param source_param: SOURCE or TARGET
+        :param member_param: MEMBER or MEMBER_B
+        :param node_id_param: NODE_ID or NODE_ID_B
+        :return:
+        '''
+
+        node_types = ['proteinfamily', 'compartment', 'complex']
+
+        for index, row in df.iterrows():
+
+            node_type = row[node_type_param]
+
+            if node_type not in node_types:
+                continue
+
+            source_or_target = row[source_param]
+            if source_or_target and source_or_target.strip() and (source_or_target.lower() != 'undefined'):
+                continue
+
+            member = row[member_param]
+            if not member:
+                continue
+
+            # get a list of proteins from member field
+            member_proteins = []
+            protein_symbols = member.split('|')
+            for protein_symbol in protein_symbols:
+                protein_array = protein_symbol.split(':')
+                if (len(protein_array) > 1):
+                    member_proteins.append(protein_array[1])
+                else:
+                    member_proteins.append(protein_array[0])
+
+            if not member_proteins:
+                continue
+
+            member_proteins.sort()
+
+            if (len(member_proteins) > 4):
+                member_proteins = member_proteins[0:4]
+                member_proteins_str = " ".join(member_proteins)
+                member_proteins_str = member_proteins_str + ' ...'
+            else:
+                member_proteins_str = " ".join(member_proteins)
+
+            node_name = 'family' if (node_type == 'proteinfamily') else node_type
+
+            row[source_or_target] = node_name + ' [ ' + member_proteins_str + ' ]'
+
+            id_to_gene_dict[row[node_id_param]] = row[source_or_target]
+
+        return
 
 
     def _get_pandas_dataframe(self, file_name):
@@ -586,7 +657,7 @@ class NDExNdextcgaloaderLoader(object):
 
         # for all nodes where column NODE is empty and NODE_TYPE column is 'FAMILY', set
         # value of NODE to "unnamed family"
-        node_df.loc[(node_df['NODE'] == '') & (node_df['NODE_TYPE'] == 'FAMILY'), "NODE"] = "unnamed family"
+        # node_df.loc[(node_df['NODE'] == '') & (node_df['NODE_TYPE'] == 'FAMILY'), "NODE"] = "unnamed family"
 
         edge_df.rename(index=str,
                        columns={'EDGE_TYPEINTERACTION_PUBMED_ID': 'EDGE_TYPE'},
@@ -639,16 +710,41 @@ class NDExNdextcgaloaderLoader(object):
         for index, row in node_df_without_edges.iterrows():
             df_with_a_b = df_with_a_b.append(row, ignore_index=True)  # Moving
 
+        add_parent_id_column, add_parent_id_column_b = self._add_member_properties(df_with_a_b)
         df_with_a_b = df_with_a_b.replace(np.nan, '', regex=True)
 
-        add_parent_id_column, add_parent_id_column_b = self._add_member_properties(df_with_a_b)
+
+        # now, we remove all nodes that have no edges, or in other words, remove all edges from dataframe that
+        # have no Edge Id
+        # however, we want to keep nodes that have no edges but
+        #    1) (have NODE_TYPE == process, and PARENT_ID is -1), or
+        #    2)(have NODE_TYPE == proteinfamily
+        #
+        # These nodes represent unrelated to nothing processes (for example, p53/p21 in
+        #  BRCA-2012-Cell-cycle-signaling-pathway) and we need to keep them.
+        #
+        # So, we iterate over df_with_a_b and add rows that satisfy our condition to the new frame, df_final
+
+        df_final = pd.DataFrame()
+        for index, row in df_with_a_b.iterrows():
+            if (pd.isnull(row['EDGE_ID']) or (row['EDGE_ID']=='')):
+                if ((row['NODE_TYPE'] == 'process') and (row['PARENT_ID'] == '-1')) or \
+                    ((row['NODE_TYPE'] == 'proteinfamily') and (row['PARENT_ID'] == '-1')):
+                        df_final = df_final.append(row, ignore_index=True)
+            else:
+                df_final = df_final.append(row, ignore_index=True)
+
+
+        self._create_names_for_unnamed_nodes(df_final, id_to_gene_dict,'NODE_TYPE', 'SOURCE', 'MEMBER', 'NODE_ID')
+
+        self._create_names_for_unnamed_nodes(df_final, id_to_gene_dict,'NODE_TYPE_B', 'TARGET', 'MEMBER_B','NODE_ID_B')
 
         # for debugging this writes the data frame generated to a file
         # in same directory input tsv files are located
         with open(path_to_file + '_with_a_b.tsv', 'w') as f:
-            f.write(df_with_a_b.to_csv(sep='\t'))
+            f.write(df_final.to_csv(sep='\t'))
 
-        return df_with_a_b, network_description, id_to_gene_dict
+        return df_final, network_description, id_to_gene_dict
 
 
 def main(args):
