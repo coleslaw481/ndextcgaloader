@@ -143,10 +143,10 @@ Here is how this command can be run for **dev** and **prod** targets:
 
 .. code-block::
 
-   ndexloadtcga.py --loadplan ./data/loadplan.json --networklistfile ./data/networks.txt --style ./data/style.cx --profile ndextcgaloader_dev -datadir ./networks
+   ndexloadtcga.py --loadplan ./data/loadplan.json --networklistfile ./data/networks.txt --style ./data/style.cx --profile ndextcgaloader_dev --datadir ./networks
 
 
-   ndexloadtcga.py --loadplan ./data/loadplan.json --networklistfile ./data/networks.txt --style ./data/style.cx --profile ndextcgaloader_prod -datadir ./networks
+   ndexloadtcga.py --loadplan ./data/loadplan.json --networklistfile ./data/networks.txt --style ./data/style.cx --profile ndextcgaloader_prod --datadir ./networks
 
 
 Via Docker
