@@ -110,14 +110,14 @@ to be visible to the **user**
     server = dev.ndexbio.org
 
     [ndextcgaloader_prod]
-    user = joe123
-    password = somepassword123
+    user = joe_p
+    password = joes_unbreakable_password
     server = ndexbio.org
 
 Needed files
 ------------
 
-**TODO:** Add description of needed files
+Three files are needed to run this script: **loadplan.json**, **networks.txt** and **style.cx**. These files are loacted in **data** directory.
 
 
 Usage
