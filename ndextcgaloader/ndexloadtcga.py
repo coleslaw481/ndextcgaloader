@@ -133,6 +133,10 @@ class NDExNdextcgaloaderLoader(object):
     """
     Class to load content
     """
+
+    # HGNC Symbol Identifier Pattern defined at https://www.ebi.ac.uk/miriam/main/datatypes/MIR:00000362
+    HGNC_REGEX = '^[A-Za-z-0-9_]+(\@)?$'
+
     def __init__(self, args):
         """
 
@@ -347,10 +351,31 @@ class NDExNdextcgaloaderLoader(object):
 
         network = t2n.convert_pandas_to_nice_cx_with_load_plan(df, self._loadplan)
 
-        # now, replace 'name' and 'represents' in network with names
+        # now, replace 'name' and 'represents' in network with names;
+        # we only have represents for simple nodes (proteins) whose represetns comply with DExNdextcgaloaderLoader.HGNC_REGEX
         for id, node in network.get_nodes():
             node['n'] = id_to_gene_dict[node['n']]
-            node['r'] = id_to_gene_dict[node['r']]
+
+            nodeId = node['@id']
+
+            if network.nodeAttributes and network.nodeAttributes[nodeId]:
+                nodeAttributes = network.nodeAttributes[nodeId]
+
+                node_resolvable = False
+
+                for attr in nodeAttributes:
+
+                    if attr['v'] == 'protein':
+                        # only simple nodes, i.e. proteins can be  resolvable
+
+                        if re.match(NDExNdextcgaloaderLoader.HGNC_REGEX, id_to_gene_dict[node['r']]):
+                            node['r'] = 'hgnc.symbol:' + id_to_gene_dict[node['r']]
+                            node_resolvable = True
+
+                        break
+
+                if not node_resolvable:
+                    del node['r']
 
         self._remove_nan_nodes(network)
         self._add_coordinates_aspect_from_pos_attributes(network)
@@ -442,7 +467,7 @@ class NDExNdextcgaloaderLoader(object):
             if element == 'nan':
                 continue
 
-            if bool(re.match('^[A-Za-z-0-9_]+(\@)?$', element)):
+            if bool(re.match(NDExNdextcgaloaderLoader.HGNC_REGEX, element)):
                 set_of_gene_names_with_prefix.add('hgnc.symbol:' + element)
             else:
                 set_of_gene_names_with_prefix.add(element)
