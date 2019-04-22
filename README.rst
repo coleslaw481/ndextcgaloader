@@ -94,8 +94,6 @@ The default path for this configuration is :code:`~/.ndexutils.conf` but can be 
     user = <NDEx username>
     password = <NDEx password>
     server = <NDEx server(omit http) ie public.ndexbio.org>
-    style = <NDEx UUID of network to use for styling networks created>
-
 
 The NDEx UUID needed for **style** can be obtained by uploading the :code:`style.cx` file found under
 the :code:`data/` directory of this repository. NOTE: The network needs to be uploaded to the same
@@ -111,7 +109,6 @@ to be visible to the **user**
     user = joe123
     password = somepassword123
     server = dev.ndexbio.org
-    style = 86f63bf8-1b48-11e9-a05d-525400c25d22
 
 
 Needed files
