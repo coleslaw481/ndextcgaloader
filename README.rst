@@ -47,7 +47,7 @@ Installation
    git clone https://github.com/coleslaw481/ndextcgaloader
    cd ndextcgaloader
    make dist
-   pip install dist/ndexloadtcga*whl
+   pip install dist/ndextcgaloader*whl
 
 
 Run **make** command with no arguments to see other build/deploy options including creation of Docker image 
