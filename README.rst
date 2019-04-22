@@ -119,6 +119,7 @@ Needed files
 
 Three files are needed to run this script: **loadplan.json**, **networks.txt** and **style.cx**. These files are loacted in **data** directory.  They are specified with **--loadplan**, **--networklistfile** and **--style** command-line arguments, accordingly.
 For example:
+
 .. code-block::
    ndexloadtcga.py --loadplan ./data/loadplan.json --networklistfile ./data/networks.txt --style ./data/style.cx 
 
@@ -130,6 +131,7 @@ For information invoke :code:`ndexloadtcga.py -h`
 In addition to the three required files listed in the previous section, we need to configure and specify profile (production or development), and working directory where tsv networks will be created before uploading to the server.
 
 The entire command is thus
+
 .. code-block::
  ndexloadtcga.py --loadplan <loadplan> --networklistfile <networks file> --style <style> --profile <profile> -datadir <datadir>
 
