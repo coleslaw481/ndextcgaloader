@@ -29,7 +29,7 @@
             },
             {
                  "column_name": "MEMBER",
-                 "attribute_name": "Member",
+                 "attribute_name": "member",
                  "data_type": "list_of_string",
                  "delimiter" : "|"
             }
@@ -55,7 +55,7 @@
             },
              {
                  "column_name": "MEMBER_B",
-                 "attribute_name": "Member",
+                 "attribute_name": "member",
                  "data_type": "list_of_string",
                  "delimiter" : "|"
              }
