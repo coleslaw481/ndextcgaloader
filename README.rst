@@ -105,11 +105,14 @@ to be visible to the **user**
 .. code-block::
 
     [ndextcgaloader_dev]
-
     user = joe123
     password = somepassword123
     server = dev.ndexbio.org
 
+    [ndextcgaloader_prod]
+    user = joe123
+    password = somepassword123
+    server = ndexbio.org
 
 Needed files
 ------------
