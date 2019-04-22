@@ -31,8 +31,8 @@ Tools
 Dependencies
 ------------
 
-* `ndex2 <https://pypi.org/project/ndex2>`_
-* `ndexutil <https://pypi.org/project/ndexutil>`_
+* `ndex2 3.1.0a1 <https://pypi.org/project/ndex2/3.1.0a1/>`_
+* `ndexutil 0.2.0a1 <https://pypi.org/project/ndexutil/0.2.0a1/>`_
 
 Compatibility
 -------------
