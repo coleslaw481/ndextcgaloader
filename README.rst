@@ -131,7 +131,10 @@ For information invoke :code:`ndexloadtcga.py -h`
 
 .. code-block::
 
-   ndexloadtcga.py # TODO Add other needed arguments here
+   ndexloadtcga.py --loadplan ./data/loadplan.json --networklistfile ./data/networks.txt --style ./data/style.cx --profile ndextcgaloader_dev -datadir ./networks
+
+
+   ndexloadtcga.py --loadplan ./data/loadplan.json --networklistfile ./data/networks.txt --style ./data/style.cx --profile ndextcgaloader_prod -datadir ./networks
 
 
 Via Docker
