@@ -139,7 +139,7 @@ The entire command is thus
 
 **Example usage**
 
-**TODO:** Add information about example usage
+Here is how this command can be run for **dev** and **prod** targets:
 
 .. code-block::
 
