@@ -64,7 +64,7 @@ def _parse_arguments(desc, args):
                                           'used '
                                           '(default '
                                           'ndextcgaloader)',
-                        default='ndextcgaloader')
+                        required=True)
     parser.add_argument('--logconf', default=None,
                         help='Path to python logging configuration file in '
                              'this format: https://docs.python.org/3/library/'
@@ -88,10 +88,8 @@ def _parse_arguments(desc, args):
 #                        DEFAULT_URL + ')',
 #                        default=DEFAULT_URL,
 #                        required=True)
-#    parser.add_argument('--style', help='Path to NDEx CX file to use for styling'
-#                                        'networks', required=True)
     parser.add_argument('--datadir', help='Directory containing data files in '
-                                          '--networklistfile')
+                                          '--networklistfile', default='./networks')
     parser.add_argument('--loadplan', help='Load plan json file', required=True)
     parser.add_argument('--networklistfile', help='File containing a list of'
                                                   'file names corresponding'
