@@ -154,10 +154,16 @@ class NDExNdextcgaloaderLoader(object):
         self._datadir = os.path.abspath(args.datadir)
         self._template = None
         self._failed_networks = []
+
+
         self._reportdir = 'reports'
 
-        self._invalid_protein_names_file = 'invalid_protein_names.tsv'
-        self._nested_nodes = 'nested_nodes.tsv'
+        self._invalid_protein_names_file_path = \
+            os.path.join(os.path.abspath(self._reportdir), 'invalid_protein_names.tsv')
+
+        self._nested_nodes_file_path = \
+            os.path.join(os.path.abspath(self._reportdir), 'nested_nodes.tsv')
+
 
         #self._networks_in_cx_dir = 'networks_in_cx'
 
@@ -216,6 +222,20 @@ class NDExNdextcgaloaderLoader(object):
         """
         self._template = ndex2.create_nice_cx_from_file(os.path.abspath(self._args.style))
 
+
+    def _prepare_report_directory(self):
+        # create reports directory if it doesn't exist
+        if not os.path.exists(self._reportdir):
+            os.makedirs(self._reportdir)
+
+        # remove reports (if any) from previous run
+        if os.path.exists(self._invalid_protein_names_file_path):
+            os.remove(self._invalid_protein_names_file_path)
+
+        if os.path.exists(self._nested_nodes_file_path):
+            os.remove(self._nested_nodes_file_path)
+
+
     def run(self):
         """
         Runs content loading for NDEx TCGA Content Loader
@@ -228,9 +248,8 @@ class NDExNdextcgaloaderLoader(object):
         self._load_network_summaries_for_user()
         self._load_style_template()
 
-        # create reports drectory if it doesn't exist
-        if not os.path.exists(self._reportdir):
-            os.makedirs(self._reportdir)
+        self._prepare_report_directory()
+
 
         with open(self._networklistfile, 'r') as networks:
             list_of_network_files = networks.read().splitlines()
@@ -359,10 +378,7 @@ class NDExNdextcgaloaderLoader(object):
         if proteins_with_invalid_names:
             proteins_with_invalid_names.sort()
 
-            path_to_file = os.path.join(os.path.abspath(self._reportdir),
-                                        self._invalid_protein_names_file)
-
-            with open(path_to_file, 'a+') as f:
+            with open(self._invalid_protein_names_file_path, 'a+') as f:
                 for protein_name in proteins_with_invalid_names:
                     str_to_write = protein_name + '\t' + network_name + '\n'
                     f.write(str_to_write)
@@ -402,14 +418,13 @@ class NDExNdextcgaloaderLoader(object):
             nested_nodes.append(str_to_write)
 
         if nested_nodes:
-            path_to_file = os.path.join(os.path.abspath(self._reportdir), self._nested_nodes)
 
-            if not os.path.exists(path_to_file):
+            if not os.path.exists(self._nested_nodes_file_path):
                 header = 'nested_node_name\tnested_node_type\tparent_node_name\tparent_node_type\tnetwork\n'
-                with open(path_to_file, 'a+') as f:
+                with open(self._nested_nodes_file_path, 'a+') as f:
                     f.write(header)
 
-            with open(path_to_file, 'a+') as f:
+            with open(self._nested_nodes_file_path, 'a+') as f:
                 f.write('\n')
                 for node in nested_nodes:
                     f.write(node)
