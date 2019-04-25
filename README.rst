@@ -31,8 +31,8 @@ Tools
 Dependencies
 ------------
 
-* `ndex2 <https://pypi.org/project/ndex2>`_
-* `ndexutil <https://pypi.org/project/ndexutil>`_
+* `ndex2 3.1.0a1 <https://pypi.org/project/ndex2/3.1.0a1/>`_
+* `ndexutil 0.2.0a1 <https://pypi.org/project/ndexutil/0.2.0a1/>`_
 
 Compatibility
 -------------
@@ -44,10 +44,10 @@ Installation
 
 .. code-block::
 
-   git clone https://github.com/coleslaw481/ndextcgaloader
+   https://github.com/vrynkov/ndextcgaloader.git
    cd ndextcgaloader
    make dist
-   pip install dist/ndexloadtcga*whl
+   pip install dist/ndextcgaloader*whl
 
 
 Run **make** command with no arguments to see other build/deploy options including creation of Docker image 
@@ -94,8 +94,6 @@ The default path for this configuration is :code:`~/.ndexutils.conf` but can be 
     user = <NDEx username>
     password = <NDEx password>
     server = <NDEx server(omit http) ie public.ndexbio.org>
-    style = <NDEx UUID of network to use for styling networks created>
-
 
 The NDEx UUID needed for **style** can be obtained by uploading the :code:`style.cx` file found under
 the :code:`data/` directory of this repository. NOTE: The network needs to be uploaded to the same
@@ -107,31 +105,48 @@ to be visible to the **user**
 .. code-block::
 
     [ndextcgaloader_dev]
-
     user = joe123
     password = somepassword123
     server = dev.ndexbio.org
-    style = 86f63bf8-1b48-11e9-a05d-525400c25d22
 
+    [ndextcgaloader_prod]
+    user = joe_p
+    password = joes_unbreakable_password
+    server = ndexbio.org
 
 Needed files
 ------------
 
-**TODO:** Add description of needed files
+Three files are needed to run this script: **loadplan.json**, **networks.txt** and **style.cx**. These files are loacted in **data** directory.  They are specified with **--loadplan**, **--networklistfile** and **--style** command-line arguments, accordingly.
+For example:
 
+.. code-block::
+
+   ndexloadtcga.py --loadplan ./data/loadplan.json --networklistfile ./data/networks.txt --style ./data/style.cx 
 
 Usage
 -----
 
 For information invoke :code:`ndexloadtcga.py -h`
 
-**Example usage**
+In addition to the three required files listed in the previous section, we need to configure and specify profile (production or development), and working directory where tsv networks will be created before uploading to the server.
 
-**TODO:** Add information about example usage
+The entire command is thus
 
 .. code-block::
 
-   ndexloadtcga.py # TODO Add other needed arguments here
+ ndexloadtcga.py --loadplan <loadplan> --networklistfile <networks file> --style <style> --profile <profile> -datadir <datadir>
+
+**Example usage**
+
+Here is how this command can be run for **dev** and **prod** targets:
+
+.. code-block::
+
+   ndexloadtcga.py --loadplan ./data/loadplan.json --networklistfile ./data/networks.txt --style ./data/style.cx --profile ndextcgaloader_dev --datadir ./networks
+
+
+   ndexloadtcga.py --loadplan ./data/loadplan.json --networklistfile ./data/networks.txt --style ./data/style.cx --profile ndextcgaloader_prod --datadir ./networks
 
 
 Via Docker
