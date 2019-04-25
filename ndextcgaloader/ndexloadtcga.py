@@ -154,6 +154,10 @@ class NDExNdextcgaloaderLoader(object):
         self._datadir = os.path.abspath(args.datadir)
         self._template = None
         self._failed_networks = []
+        self._reportdir = 'reports'
+
+        self._invalid_protein_names_file = 'invalid_protein_names.tsv'
+        self._nested_nodes = 'nested_nodes.tsv'
 
         #self._networks_in_cx_dir = 'networks_in_cx'
 
@@ -223,6 +227,10 @@ class NDExNdextcgaloaderLoader(object):
         self._create_ndex_connection()
         self._load_network_summaries_for_user()
         self._load_style_template()
+
+        # create reports drectory if it doesn't exist
+        if not os.path.exists(self._reportdir):
+            os.makedirs(self._reportdir)
 
         with open(self._networklistfile, 'r') as networks:
             list_of_network_files = networks.read().splitlines()
@@ -333,6 +341,78 @@ class NDExNdextcgaloaderLoader(object):
           'Li Ding, Nikolaus Schultz')
 
         network.set_network_attribute("organism", "Human, 9606, Homo sapiens")
+
+
+    def _report_proteins_with_invalid_names(self, node_df, network_name):
+
+        proteins_with_invalid_names = []
+
+        for index, row in node_df.iterrows():
+            if (row['NODE_TYPE'] != 'GENE'):
+                continue
+
+            protein_name = row['NODE']
+
+            if not re.match(NDExNdextcgaloaderLoader.HGNC_REGEX, protein_name):
+                proteins_with_invalid_names.append(protein_name)
+
+        if proteins_with_invalid_names:
+            proteins_with_invalid_names.sort()
+
+            path_to_file = os.path.join(os.path.abspath(self._reportdir),
+                                        self._invalid_protein_names_file)
+
+            with open(path_to_file, 'a+') as f:
+                for protein_name in proteins_with_invalid_names:
+                    str_to_write = protein_name + '\t' + network_name + '\n'
+                    f.write(str_to_write)
+                f.write('\n')
+
+
+    def _get_node_name_and_type(self, node_df, node_id):
+        for index, row in node_df.iterrows():
+            if (row['NODE_ID'] == node_id):
+                return row['NODE'], row['NODE_TYPE']
+
+        return None, None
+
+
+    def _report_nested_nodes(self, node_df, network_name):
+
+        nested_nodes= []
+
+        for index, row in node_df.iterrows():
+            if (row['NODE_TYPE'] == 'GENE'):
+                continue
+
+            if (row['PARENT_ID'] == '-1'):
+                continue
+
+            # we found a node that is not GENE and that has a parent
+
+            parent_node_name, parent_node_type = self._get_node_name_and_type(node_df, row['PARENT_ID'])
+
+            # get name and type of current node
+            nested_node_name = row['NODE']
+            nested_node_type = row['NODE_TYPE']
+
+            str_to_write = nested_node_name + '\t' + nested_node_type + '\t';
+            str_to_write += parent_node_name + '\t' + parent_node_type + '\t' + network_name + '\n'
+
+            nested_nodes.append(str_to_write)
+
+        if nested_nodes:
+            path_to_file = os.path.join(os.path.abspath(self._reportdir), self._nested_nodes)
+
+            if not os.path.exists(path_to_file):
+                header = 'nested_node_name\tnested_node_type\tparent_node_name\tparent_node_type\tnetwork\n'
+                with open(path_to_file, 'a+') as f:
+                    f.write(header)
+
+            with open(path_to_file, 'a+') as f:
+                f.write('\n')
+                for node in nested_nodes:
+                    f.write(node)
 
     def _process_file(self, file_name):
 
@@ -675,12 +755,6 @@ class NDExNdextcgaloaderLoader(object):
 
         node_df.rename(index=str, columns={'NODE_NAME': 'NODE'}, inplace=True)
         edge_df.rename(index=str, columns={'--EDGE_ID': 'EDGE_ID'}, inplace=True)
-        # node_df['PARENT_ID'] = node_df['PARENT_ID'].map(id_to_gene_dict, na_action='ignore')
-
-
-        # for all nodes where column NODE is empty and NODE_TYPE column is 'FAMILY', set
-        # value of NODE to "unnamed family"
-        # node_df.loc[(node_df['NODE'] == '') & (node_df['NODE_TYPE'] == 'FAMILY'), "NODE"] = "unnamed family"
 
         edge_df.rename(index=str,
                        columns={'EDGE_TYPEINTERACTION_PUBMED_ID': 'EDGE_TYPE'},
@@ -766,6 +840,11 @@ class NDExNdextcgaloaderLoader(object):
         # in same directory input tsv files are located
         with open(path_to_file + '_with_a_b.tsv', 'w') as f:
             f.write(df_final.to_csv(sep='\t'))
+
+
+        network_name = file_name.replace('.txt', '')
+        self._report_proteins_with_invalid_names(node_df, network_name)
+        self._report_nested_nodes(node_df, network_name)
 
         return df_final, network_description, id_to_gene_dict
 
