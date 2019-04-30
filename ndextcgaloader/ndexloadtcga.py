@@ -164,9 +164,7 @@ class NDExNdextcgaloaderLoader(object):
         self._nested_nodes_file_path = \
             os.path.join(os.path.abspath(self._reportdir), 'nested_nodes.tsv')
 
-
-        #self._networks_in_cx_dir = 'networks_in_cx'
-
+        self._networks_in_cx_dir = 'networks_in_cx'
 
     def _parse_config(self):
             """
@@ -483,6 +481,17 @@ class NDExNdextcgaloaderLoader(object):
         # apply style to network
         network.apply_style_from_network(self._template)
 
+        # save network in CX
+        path_to_networks_in_cx = self._networks_in_cx_dir
+        if not os.path.exists(path_to_networks_in_cx):
+            os.makedirs(path_to_networks_in_cx)
+
+        full_network_in_cx_path = os.path.join(path_to_networks_in_cx, network.get_name() + '.cx')
+
+        with open(full_network_in_cx_path, 'w') as f:
+            json.dump(network.to_cx(), f, indent=4)
+
+
         if network_update_key is not None:
             return network.update_to(network_update_key, self._server, self._user, self._pass,
                                      user_agent=self._get_user_agent())
@@ -492,15 +501,6 @@ class NDExNdextcgaloaderLoader(object):
                                                user_agent=self._get_user_agent())
         return upload_message
 
-        #path_to_networks_in_cx = self._networks_in_cx_dir
-        #if not os.path.exists(path_to_networks_in_cx):
-        #    os.makedirs(path_to_networks_in_cx)
-
-        #full_network_in_cx_path = path_to_networks_in_cx + '/' + network.get_name() + '.cx'
-        #with open(full_network_in_cx_path, 'w') as f:
-        #    json.dump(network.to_cx(), f, indent=4)
-
-        #return
 
     def _handle_error(self, network_name):
         print('unable to get network {}'.format(network_name))
@@ -853,9 +853,9 @@ class NDExNdextcgaloaderLoader(object):
 
         # for debugging this writes the data frame generated to a file
         # in same directory input tsv files are located
-        with open(path_to_file + '_with_a_b.tsv', 'w') as f:
+        path_to_tsv_file = path_to_file.replace('.txt','.tsv')
+        with open(path_to_tsv_file, 'w') as f:
             f.write(df_final.to_csv(sep='\t'))
-
 
         network_name = file_name.replace('.txt', '')
         self._report_proteins_with_invalid_names(node_df, network_name)
