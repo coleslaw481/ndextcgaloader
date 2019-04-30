@@ -117,7 +117,7 @@ to be visible to the **user**
 Needed files
 ------------
 
-Three files are needed to run this script: **loadplan.json**, **networks.txt** and **style.cx**. These files are loacted in **data** directory.  They are specified with **--loadplan**, **--networklistfile** and **--style** command-line arguments, accordingly.
+Three files are needed to run this script: **loadplan.json**, **networks.txt** and **style.cx**. These files are located in **data** directory.  They are specified with **--loadplan**, **--networklistfile** and **--style** command-line arguments, accordingly.
 For example:
 
 .. code-block::
