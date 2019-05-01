@@ -11,17 +11,26 @@ import unittest
 from ndexutil.config import NDExUtilConfig
 from ndextcgaloader import ndexloadtcga
 
+import json
+import ndex2
+
 
 class TestNdextcgaloader(unittest.TestCase):
     """Tests for `ndextcgaloader` package."""
 
     def setUp(self):
         """Set up test fixtures, if any."""
+        self._networklistfile = '../data/networks.txt'
+        self._loadplan_path   = '../data/loadplan.json'
+
+        self._sample_networks = 'sample_networks_in_cx'
+        self._networks_for_testing = 'networks_in_cx'
+
 
     def tearDown(self):
         """Tear down test fixtures, if any."""
 
-    def test_parse_arguments(self):
+    def _test_parse_arguments(self):
         """Tests parse arguments"""
         res = ndexloadtcga._parse_arguments('hi', [])
 
@@ -40,7 +49,7 @@ class TestNdextcgaloader(unittest.TestCase):
         self.assertEqual(res.conf, 'foo')
 
 
-    def test_setup_logging(self):
+    def _test_setup_logging(self):
         """ Tests logging setup"""
         try:
             ndexloadtcga._setup_logging(None)
@@ -87,23 +96,94 @@ format=%(asctime)s %(name)-12s %(levelname)-8s %(message)s""")
         finally:
             shutil.rmtree(temp_dir)
 
+
+    def validate_network(self, network, sample_network, file_name):
+
+        edges, nodes, node_attributes = network.edges, network.nodes, network.nodeAttributes
+        sample_edges, sample_nodes, sample_node_attributes = sample_network.edges, sample_network.nodes, sample_network.nodeAttributes
+
+
+        self.assertEqual(len(edges), len(sample_edges), 'Edges in sample ' + file_name)
+        self.assertEqual(len(nodes), len(sample_nodes), 'Nodes in sample ' + file_name)
+        self.assertEqual(len(node_attributes), len(sample_node_attributes), 'Node Attributes in sample ' + file_name)
+
+        for key, value in edges.items():
+            sample_value = sample_edges[key]
+            self.assertEqual(value, sample_value, 'Edges are different in ' + file_name)
+
+        for key, value in nodes.items():
+            sample_value = sample_nodes[key]
+            self.assertEqual(value, sample_value, 'Nodes are different in ' + file_name)
+
+        for key, value in node_attributes.items():
+            sample_value = sample_node_attributes[key]
+            self.assertEqual(value, sample_value, 'Nodes attributes are different in ' + file_name)
+
+
+    def test_networks(self):
+
+        with open(self._networklistfile, 'r') as networks:
+            list_of_network_files = networks.read().splitlines()
+            list_of_network_files_in_cx = [network.replace('.txt', '.cx') for network in list_of_network_files]
+
+
+        with open(self._loadplan_path, 'r') as f:
+            self._loadplan = json.load(f)
+
+        for network_file in list_of_network_files_in_cx:
+
+            path_to_network_for_testing = os.path.join(os.path.abspath(self._networks_for_testing), network_file)
+            network_for_testing_in_cx = ndex2.create_nice_cx_from_file(path_to_network_for_testing)
+
+            path_to_sample_network = os.path.join(os.path.abspath(self._sample_networks), network_file)
+            network_sample_in_cx = ndex2.create_nice_cx_from_file(path_to_sample_network)
+
+            self.validate_network(network_for_testing_in_cx, network_sample_in_cx, network_file)
+
+            print(network_file)
+
+        pass
+
+
     def test_main(self):
         """Tests main function"""
 
         # try where loading config is successful
         try:
-            temp_dir = tempfile.mkdtemp()
-            confile = os.path.join(temp_dir, 'some.conf')
-            with open(confile, 'w') as f:
-                f.write("""[hi]
-                {user} = bob
-                {pw} = smith
-                {server} = dev.ndexbio.org""".format(user=NDExUtilConfig.USER,
-                                                     pw=NDExUtilConfig.PASSWORD,
-                                                     server=NDExUtilConfig.SERVER))
-            res = ndexloadtcga.main(['myprog.py', '--conf',
-                                                     confile, '--profile',
-                                                     'hi'])
+            #temp_dir = tempfile.mkdtemp()
+            #confile = os.path.join(temp_dir, 'some.conf')
+            #with open(confile, 'w') as f:
+            #    f.write("""[hi]
+            #    {user} = bob
+            #    {pw} = smith
+            #    {server} = dev.ndexbio.org""".format(user=NDExUtilConfig.USER,
+            #                                         pw=NDExUtilConfig.PASSWORD,
+            #                                         server=NDExUtilConfig.SERVER))
+
+            #res = ndexloadtcga.main(['myprog.py', '--conf',
+            #                                         confile, '--profile',
+            #                                         'hi'])
+
+            # --loadplan ../data/loadplan.json
+            # --networklistfile ../data/networks.txt
+            # --style ../data/style.cx
+            # --profile ndextcgaloader_dev
+            # --datadir ./networks
+            #print('t')
+
+            res = ndexloadtcga.main(['myprog.py',
+                 '--loadplan',  '../data/loadplan.json',
+                 '--networklistfile', '../data/networks.txt',
+                 '--style', '../data/style.cx',
+                 '--profile', 'ndextcgaloader_dev',
+                 '--datadir', 'networks'])
             self.assertEqual(res, 0)
+
         finally:
-            shutil.rmtree(temp_dir)
+            print('done')
+
+
+
+
+        #finally:
+        #    shutil.rmtree(temp_dir)
