@@ -394,6 +394,7 @@ class NDExNdextcgaloaderLoader(object):
     def _report_nested_nodes(self, node_df, network_name):
 
         nested_nodes= []
+        nested_nodes_ids = {}
 
         for index, row in node_df.iterrows():
             if (row['NODE_TYPE'] == 'GENE'):
@@ -410,10 +411,14 @@ class NDExNdextcgaloaderLoader(object):
             nested_node_name = row['NODE']
             nested_node_type = row['NODE_TYPE']
 
-            str_to_write = nested_node_name + '\t' + nested_node_type + '\t';
+            str_to_write = nested_node_name + '\t' + nested_node_type + '\t'
             str_to_write += parent_node_name + '\t' + parent_node_type + '\t' + network_name + '\n'
 
             nested_nodes.append(str_to_write)
+            nested_nodes_ids[row['NODE_ID']] = row['PARENT_ID']
+
+            #if (nested_node_type == 'FAMILY'):
+            #    nested_nodes_ids[row['NODE_ID']] = row['PARENT_ID']
 
         if nested_nodes:
 
@@ -426,6 +431,8 @@ class NDExNdextcgaloaderLoader(object):
                 f.write('\n')
                 for node in nested_nodes:
                     f.write(node)
+
+        return nested_nodes_ids
 
     def _process_file(self, file_name):
 
@@ -698,6 +705,22 @@ class NDExNdextcgaloaderLoader(object):
         return
 
 
+    def _normalize_nodes(self, nodes_df, nested_nodes_map):
+        for key, value in nested_nodes_map.items():
+            nodes_df = nodes_df[nodes_df.NODE_ID != key]
+            nodes_df['PARENT_ID'].replace([key], value, inplace=True)
+
+        return nodes_df
+
+    def  _process_nested_nodes(self, node_df, nested_nodes_map, network_name):
+        normalized_df_nodes = node_df.copy()
+
+        while nested_nodes_map:
+            normalized_df_nodes = self._normalize_nodes(normalized_df_nodes, nested_nodes_map)
+            nested_nodes_map = self._report_nested_nodes(normalized_df_nodes, network_name)
+
+        return normalized_df_nodes
+
     def _get_pandas_dataframe(self, file_name):
         """
         Gets pandas data frame from file
@@ -770,6 +793,13 @@ class NDExNdextcgaloaderLoader(object):
 
         node_df.rename(index=str, columns={'NODE_NAME': 'NODE'}, inplace=True)
         edge_df.rename(index=str, columns={'--EDGE_ID': 'EDGE_ID'}, inplace=True)
+        network_name = file_name.replace('.txt', '')
+
+        self._report_proteins_with_invalid_names(node_df, network_name)
+        nested_nodes_map = self._report_nested_nodes(node_df, network_name)
+
+        if nested_nodes_map:
+            node_df = self._process_nested_nodes(node_df, nested_nodes_map, network_name)
 
         edge_df.rename(index=str,
                        columns={'EDGE_TYPEINTERACTION_PUBMED_ID': 'EDGE_TYPE'},
@@ -829,8 +859,7 @@ class NDExNdextcgaloaderLoader(object):
         # now, we remove all nodes that have no edges, or in other words, remove all edges from dataframe that
         # have no Edge Id
         # however, we want to keep nodes that have no edges but
-        #    1) (have NODE_TYPE == process, and PARENT_ID is -1), or
-        #    2)(have NODE_TYPE == proteinfamily
+        #    1) (have NODE_TYPE != protein, and PARENT_ID is -1)
         #
         # These nodes represent unrelated to nothing processes (for example, p53/p21 in
         #  BRCA-2012-Cell-cycle-signaling-pathway) and we need to keep them.
@@ -840,8 +869,8 @@ class NDExNdextcgaloaderLoader(object):
         df_final = pd.DataFrame()
         for index, row in df_with_a_b.iterrows():
             if (pd.isnull(row['EDGE_ID']) or (row['EDGE_ID']=='')):
-                if ((row['NODE_TYPE'] == 'process') and (row['PARENT_ID'] == '-1')) or \
-                    ((row['NODE_TYPE'] == 'proteinfamily') and (row['PARENT_ID'] == '-1')):
+                if ((row['NODE_TYPE'] != 'protein') and (row['PARENT_ID'] == '-1')):
+
                         df_final = df_final.append(row, ignore_index=True)
             else:
                 df_final = df_final.append(row, ignore_index=True)
@@ -856,10 +885,6 @@ class NDExNdextcgaloaderLoader(object):
         path_to_tsv_file = path_to_file.replace('.txt','.tsv')
         with open(path_to_tsv_file, 'w') as f:
             f.write(df_final.to_csv(sep='\t'))
-
-        network_name = file_name.replace('.txt', '')
-        self._report_proteins_with_invalid_names(node_df, network_name)
-        self._report_nested_nodes(node_df, network_name)
 
         return df_final, network_description, id_to_gene_dict
 
