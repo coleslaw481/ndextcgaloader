@@ -102,6 +102,8 @@ def _parse_arguments(desc, args):
                         version=('%(prog)s ' +
                                  ndextcgaloader.__version__))
 
+    parser.add_argument('--tcgaversion', help='Version of NDEx TCGA Networks', required=True)
+
     return parser.parse_args(args)
 
 
@@ -144,6 +146,9 @@ class NDExNdextcgaloaderLoader(object):
         """
         self._conf_file = args.conf
         self._profile = args.profile
+
+        self._tcga_version = args.tcgaversion
+
         self._args = args
         self._user = None
         self._pass = None
@@ -362,6 +367,9 @@ class NDExNdextcgaloaderLoader(object):
         networkType=[]
         networkType.append('pathway')
         network.set_network_attribute("type", json.dumps(networkType))
+
+        network.set_network_attribute("version", self._tcga_version)
+
 
 
     def _report_proteins_with_invalid_names(self, node_df, network_name):
