@@ -359,6 +359,10 @@ class NDExNdextcgaloaderLoader(object):
 
         network.set_network_attribute("organism", "Human, 9606, Homo sapiens")
 
+        networkType=[]
+        networkType.append('pathway')
+        network.set_network_attribute("type", json.dumps(networkType))
+
 
     def _report_proteins_with_invalid_names(self, node_df, network_name):
 
