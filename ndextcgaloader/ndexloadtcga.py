@@ -166,7 +166,7 @@ def _parse_arguments(desc, args):
                         version=('%(prog)s ' +
                                  ndextcgaloader.__version__))
 
-    parser.add_argument('--tcgaversion', help='Version of NDEx TCGA Networks', default='1.2')
+    parser.add_argument('--tcgaversion', help='Version of NDEx TCGA Networks', default='1.0')
 
     return parser.parse_args(args)
 
