@@ -26,6 +26,7 @@ LOG_FORMAT = "%(asctime)-15s %(levelname)s %(relativeCreated)dms " \
              "%(filename)s::%(funcName)s():%(lineno)d %(message)s"
 
 DEFAULT_URL = 'https://raw.githubusercontent.com/iVis-at-Bilkent/pathway-mapper/master/samples'
+DEFAULT_URL_HUMAN = 'https://github.com/iVis-at-Bilkent/pathway-mapper/tree/master/samples'
 
 # Simple dictionary mapping values in type field to
 # normalized values
@@ -122,11 +123,10 @@ def _parse_arguments(desc, args):
     parser.add_argument('--profile', help='Profile in configuration '
                                           'file to use to load '
                                           'NDEx credentials which means'
-                                          'configuration under [XXX] will be'
+                                          'configuration under [XXX] will be '
                                           'used '
                                           '(default '
-                                          'ndextcgaloader)',
-                        required=True)
+                                          'ndextcgaloader)', default='ndextcgaloader')
     parser.add_argument('--logconf', default=None,
                         help='Path to python logging configuration file in '
                              'this format: https://docs.python.org/3/library/'
@@ -968,20 +968,49 @@ def main(args):
     desc = """
     Version {version}
 
-    Loads NDEx TCGA Content Loader data into NDEx (http://ndexbio.org).
+    Loads NDEx TCGA Content Loader data into NDEx (http://ndexbio.org):
 
-    To connect to NDEx server a configuration file must be passed
-    into --conf parameter. If --conf is unset the configuration
-    the path ~/{confname} is examined.
+    1) downloads network files in text format from server specified by --dataurl argument
+    (default is https://github.com/iVis-at-Bilkent/pathway-mapper/tree/master/samples)
+    2) the list of files to be downloaded is specified by --networklistfille argument
+    (default is networks.txt that comes with the distribution of this utility)
+    3) the files are downloaded to a directory specified by --datadir argument
+    (default is network in ndextcgaloader installation directory). Downloaded text files
+    are then transformed into TSV and to CX formats and are uploaded
+    to the NDEx server
+    4) to connect to NDEx server and upload generated in CX format networks, a configuration file must be passed
+    with --conf parameter. If --conf is not specified, the configuration ~/{confname} is examined.
+
 
     The configuration file should be formatted as follows:
 
-    [<value in --profile (default ncipid)>]
+    [<value in --profile (default ndextcgaloader)>]
 
     {user} = <NDEx username>
     {password} = <NDEx password>
-    {server} = <NDEx server(omit http) ie public.ndexbio.org>
+    {server} = <NDEx server(omit http), i.e., public.ndexbio.org>
 
+    Example of a default configuration in ~/{confname}:
+
+    [ndextcgaloader]
+    user = rudi
+    password = rudi!
+    server = dev.ndexbio.org
+
+    To run utility with the above config, it is suffice to call utility with no arguments at all:
+
+    ndexloadtcga.py
+
+    Example of a production configuration in ~/{confname}:
+
+    [ndextcgaloader_prod]
+    user = rudi
+    password = rudisVerySecureProdPassword
+    server = ndexbio.org
+
+    To make ndexloadtcga upload networks to account rudi on ndexbio.org, ndexloadtcga.py can be called like this:
+
+    ndexloadtcga.py --profile ndextcgaloader_prod
 
     """.format(confname=NDExUtilConfig.CONFIG_FILE,
                user=NDExUtilConfig.USER,
