@@ -1,0 +1,1017 @@
+[
+    {
+        "numberVerification": [
+            {
+                "longNumber": 281474976710655
+            }
+        ]
+    },
+    {
+        "metaData": [
+            {
+                "name": "cyVisualProperties",
+                "elementCount": 3,
+                "version": "1.0",
+                "consistencyGroup": 1,
+                "properties": []
+            },
+            {
+                "name": "@context",
+                "elementCount": 1,
+                "idCounter": 1,
+                "version": "1.0",
+                "consistencyGroup": 1,
+                "properties": []
+            },
+            {
+                "name": "nodes",
+                "elementCount": 29,
+                "idCounter": 29,
+                "version": "1.0",
+                "consistencyGroup": 1,
+                "properties": []
+            },
+            {
+                "name": "edges",
+                "elementCount": 32,
+                "idCounter": 32,
+                "version": "1.0",
+                "consistencyGroup": 1,
+                "properties": []
+            },
+            {
+                "name": "networkAttributes",
+                "elementCount": 5,
+                "idCounter": 5,
+                "version": "1.0",
+                "consistencyGroup": 1,
+                "properties": []
+            },
+            {
+                "name": "nodeAttributes",
+                "elementCount": 36,
+                "idCounter": 36,
+                "version": "1.0",
+                "consistencyGroup": 1,
+                "properties": []
+            },
+            {
+                "name": "cartesianLayout",
+                "elementCount": 29,
+                "idCounter": 30,
+                "properties": []
+            }
+        ]
+    },
+    {
+        "@context": [
+            {
+                "pubmed": "http://identifiers.org/pubmed/",
+                "chebi": "http://identifiers.org/chebi/CHEBI:",
+                "uniprot": "http://identifiers.org/uniprot/",
+                "cas": "http://identifiers.org/cas/",
+                "kegg.compound": "http://identifiers.org/kegg.compound/",
+                "hprd": "http://identifiers.org/hprd/",
+                "hgnc": "http://identifiers.org/hgnc.symbol/"
+            }
+        ]
+    },
+    {
+        "nodes": [
+            {
+                "@id": 0,
+                "n": "BAD",
+                "r": "hgnc.symbol:BAD"
+            },
+            {
+                "@id": 1,
+                "n": "BCL"
+            },
+            {
+                "@id": 2,
+                "n": "CASP"
+            },
+            {
+                "@id": 3,
+                "n": "MCL1",
+                "r": "hgnc.symbol:MCL1"
+            },
+            {
+                "@id": 4,
+                "n": "APOL"
+            },
+            {
+                "@id": 5,
+                "n": "APO"
+            },
+            {
+                "@id": 6,
+                "n": "PUMA",
+                "r": "hgnc.symbol:PUMA"
+            },
+            {
+                "@id": 7,
+                "n": "FADD",
+                "r": "hgnc.symbol:FADD"
+            },
+            {
+                "@id": 8,
+                "n": "TRADD",
+                "r": "hgnc.symbol:TRADD"
+            },
+            {
+                "@id": 9,
+                "n": "BIM",
+                "r": "hgnc.symbol:BIM"
+            },
+            {
+                "@id": 10,
+                "n": "BAK",
+                "r": "hgnc.symbol:BAK"
+            },
+            {
+                "@id": 11,
+                "n": "BAX",
+                "r": "hgnc.symbol:BAX"
+            },
+            {
+                "@id": 12,
+                "n": "TRAF3",
+                "r": "hgnc.symbol:TRAF3"
+            },
+            {
+                "@id": 13,
+                "n": "NF-kB",
+                "r": "hgnc.symbol:NF-kB"
+            },
+            {
+                "@id": 14,
+                "n": "NOXA",
+                "r": "hgnc.symbol:NOXA"
+            },
+            {
+                "@id": 15,
+                "n": "BID",
+                "r": "hgnc.symbol:BID"
+            },
+            {
+                "@id": 16,
+                "n": "TRAF2",
+                "r": "hgnc.symbol:TRAF2"
+            },
+            {
+                "@id": 17,
+                "n": "FASL",
+                "r": "hgnc.symbol:FASL"
+            },
+            {
+                "@id": 18,
+                "n": "FAS",
+                "r": "hgnc.symbol:FAS"
+            },
+            {
+                "@id": 19,
+                "n": "XIAP",
+                "r": "hgnc.symbol:XIAP"
+            },
+            {
+                "@id": 20,
+                "n": "BIRC2",
+                "r": "hgnc.symbol:BIRC2"
+            },
+            {
+                "@id": 21,
+                "n": "TNF-alpha",
+                "r": "hgnc.symbol:TNF-alpha"
+            },
+            {
+                "@id": 22,
+                "n": "TNFR1",
+                "r": "hgnc.symbol:TNFR1"
+            },
+            {
+                "@id": 23,
+                "n": "TRAF"
+            },
+            {
+                "@id": 24,
+                "n": "TNFR-LTBR"
+            },
+            {
+                "@id": 25,
+                "n": "IAPs",
+                "r": "hgnc.symbol:IAPs"
+            },
+            {
+                "@id": 26,
+                "n": "SMAC-DIABLO"
+            },
+            {
+                "@id": 27,
+                "n": "FLIP",
+                "r": "hgnc.symbol:FLIP"
+            },
+            {
+                "@id": 28,
+                "n": "SMAC",
+                "r": "hgnc.symbol:SMAC"
+            }
+        ]
+    },
+    {
+        "edges": [
+            {
+                "@id": 0,
+                "s": 0,
+                "t": 1,
+                "i": "inhibits"
+            },
+            {
+                "@id": 1,
+                "s": 0,
+                "t": 2,
+                "i": "activates"
+            },
+            {
+                "@id": 2,
+                "s": 0,
+                "t": 3,
+                "i": "inhibits"
+            },
+            {
+                "@id": 3,
+                "s": 4,
+                "t": 5,
+                "i": "binds"
+            },
+            {
+                "@id": 4,
+                "s": 6,
+                "t": 1,
+                "i": "inhibits"
+            },
+            {
+                "@id": 5,
+                "s": 6,
+                "t": 3,
+                "i": "inhibits"
+            },
+            {
+                "@id": 6,
+                "s": 7,
+                "t": 8,
+                "i": "binds"
+            },
+            {
+                "@id": 7,
+                "s": 7,
+                "t": 2,
+                "i": "activates"
+            },
+            {
+                "@id": 8,
+                "s": 9,
+                "t": 1,
+                "i": "inhibits"
+            },
+            {
+                "@id": 9,
+                "s": 9,
+                "t": 3,
+                "i": "inhibits"
+            },
+            {
+                "@id": 10,
+                "s": 1,
+                "t": 10,
+                "i": "inhibits"
+            },
+            {
+                "@id": 11,
+                "s": 1,
+                "t": 11,
+                "i": "inhibits"
+            },
+            {
+                "@id": 12,
+                "s": 12,
+                "t": 13,
+                "i": "inhibits"
+            },
+            {
+                "@id": 13,
+                "s": 14,
+                "t": 1,
+                "i": "inhibits"
+            },
+            {
+                "@id": 14,
+                "s": 14,
+                "t": 3,
+                "i": "inhibits"
+            },
+            {
+                "@id": 15,
+                "s": 15,
+                "t": 1,
+                "i": "inhibits"
+            },
+            {
+                "@id": 16,
+                "s": 16,
+                "t": 8,
+                "i": "binds"
+            },
+            {
+                "@id": 17,
+                "s": 17,
+                "t": 18,
+                "i": "binds"
+            },
+            {
+                "@id": 18,
+                "s": 19,
+                "t": 2,
+                "i": "inhibits"
+            },
+            {
+                "@id": 19,
+                "s": 20,
+                "t": 12,
+                "i": "inhibits"
+            },
+            {
+                "@id": 20,
+                "s": 20,
+                "t": 2,
+                "i": "inhibits"
+            },
+            {
+                "@id": 21,
+                "s": 21,
+                "t": 22,
+                "i": "binds"
+            },
+            {
+                "@id": 22,
+                "s": 23,
+                "t": 8,
+                "i": "binds"
+            },
+            {
+                "@id": 23,
+                "s": 24,
+                "t": 20,
+                "i": "activates"
+            },
+            {
+                "@id": 24,
+                "s": 24,
+                "t": 7,
+                "i": "activates"
+            },
+            {
+                "@id": 25,
+                "s": 25,
+                "t": 26,
+                "i": "inhibits"
+            },
+            {
+                "@id": 26,
+                "s": 25,
+                "t": 2,
+                "i": "inhibits"
+            },
+            {
+                "@id": 27,
+                "s": 3,
+                "t": 10,
+                "i": "inhibits"
+            },
+            {
+                "@id": 28,
+                "s": 3,
+                "t": 11,
+                "i": "inhibits"
+            },
+            {
+                "@id": 29,
+                "s": 27,
+                "t": 2,
+                "i": "inhibits"
+            },
+            {
+                "@id": 30,
+                "s": 2,
+                "t": 13,
+                "i": "inhibits"
+            },
+            {
+                "@id": 31,
+                "s": 28,
+                "t": 19,
+                "i": "inhibits"
+            }
+        ]
+    },
+    {
+        "networkAttributes": [
+            {
+                "n": "name",
+                "v": "PanCancer-Apoptosis-pathway",
+                "d": "string"
+            },
+            {
+                "n": "prov:wasGeneratedBy",
+                "v": "ndextcgaloader 0.1.0"
+            },
+            {
+                "n": "reference",
+                "v": "Francisco Sanchez-Vega, Marco Mina, Joshua Armenia, Walid K.Chatila, Augustin Luna, Konnor C.La, Sofia Dimitriadoy, David L.Liu, Havish S.Kantheti, Sadegh Saghafinia, Debyani Chakravarty, Foysal Daian, Qingsong Gao, Matthew H.Bailey, Wen-Wei Liang, Steven M.Foltz, Ilya Shmulevich, Li Ding, ... Nikolaus Schultz<br> <b>Oncogenic Signaling Pathways in The Cancer Genome Atlas</b><br><i>Cell</i>, Volume 173, Issue 2, 5 April 2018, Pages 321-337.e10 <br><a target=\"_blank\" href=\"https://doi.org/10.1016/j.cell.2018.03.035\">doi: 10.1016/j.cell.2018.03.035</a>"
+            },
+            {
+                "n": "author",
+                "v": "Francisco Sanchez-Vega, Marco Mina, Joshua Armenia, Walid K.Chatila, Augustin Luna, Konnor C.La, Sofia Dimitriadoy, David L.Liu, Havish S.Kantheti, Sadegh Saghafinia, Debyani Chakravarty, Foysal Daian, Qingsong Gao, Matthew H.Bailey, Wen-Wei Liang, Steven M.Foltz, Ilya Shmulevich, Li Ding, Nikolaus Schultz"
+            },
+            {
+                "n": "organism",
+                "v": "Human, 9606, Homo sapiens"
+            }
+        ]
+    },
+    {
+        "nodeAttributes": [
+            {
+                "po": 0,
+                "n": "type",
+                "v": "protein",
+                "d": "string"
+            },
+            {
+                "po": 1,
+                "n": "type",
+                "v": "proteinfamily",
+                "d": "string"
+            },
+            {
+                "po": 1,
+                "n": "member",
+                "v": [
+                    "hgnc.symbol:BCL-2",
+                    "hgnc.symbol:BCL-XL"
+                ],
+                "d": "list_of_string"
+            },
+            {
+                "po": 2,
+                "n": "type",
+                "v": "proteinfamily",
+                "d": "string"
+            },
+            {
+                "po": 2,
+                "n": "member",
+                "v": [
+                    "hgnc.symbol:CASP10",
+                    "hgnc.symbol:CASP3",
+                    "hgnc.symbol:CASP6",
+                    "hgnc.symbol:CASP7",
+                    "hgnc.symbol:CASP8",
+                    "hgnc.symbol:CASP9"
+                ],
+                "d": "list_of_string"
+            },
+            {
+                "po": 3,
+                "n": "type",
+                "v": "protein",
+                "d": "string"
+            },
+            {
+                "po": 4,
+                "n": "type",
+                "v": "proteinfamily",
+                "d": "string"
+            },
+            {
+                "po": 4,
+                "n": "member",
+                "v": [
+                    "hgnc.symbol:APO2L",
+                    "hgnc.symbol:APO3L"
+                ],
+                "d": "list_of_string"
+            },
+            {
+                "po": 5,
+                "n": "type",
+                "v": "proteinfamily",
+                "d": "string"
+            },
+            {
+                "po": 5,
+                "n": "member",
+                "v": [
+                    "hgnc.symbol:APO2",
+                    "hgnc.symbol:APO3"
+                ],
+                "d": "list_of_string"
+            },
+            {
+                "po": 6,
+                "n": "type",
+                "v": "protein",
+                "d": "string"
+            },
+            {
+                "po": 7,
+                "n": "type",
+                "v": "protein",
+                "d": "string"
+            },
+            {
+                "po": 8,
+                "n": "type",
+                "v": "protein",
+                "d": "string"
+            },
+            {
+                "po": 9,
+                "n": "type",
+                "v": "protein",
+                "d": "string"
+            },
+            {
+                "po": 10,
+                "n": "type",
+                "v": "protein",
+                "d": "string"
+            },
+            {
+                "po": 11,
+                "n": "type",
+                "v": "protein",
+                "d": "string"
+            },
+            {
+                "po": 12,
+                "n": "type",
+                "v": "protein",
+                "d": "string"
+            },
+            {
+                "po": 13,
+                "n": "type",
+                "v": "protein",
+                "d": "string"
+            },
+            {
+                "po": 14,
+                "n": "type",
+                "v": "protein",
+                "d": "string"
+            },
+            {
+                "po": 15,
+                "n": "type",
+                "v": "protein",
+                "d": "string"
+            },
+            {
+                "po": 16,
+                "n": "type",
+                "v": "protein",
+                "d": "string"
+            },
+            {
+                "po": 17,
+                "n": "type",
+                "v": "protein",
+                "d": "string"
+            },
+            {
+                "po": 18,
+                "n": "type",
+                "v": "protein",
+                "d": "string"
+            },
+            {
+                "po": 19,
+                "n": "type",
+                "v": "protein",
+                "d": "string"
+            },
+            {
+                "po": 20,
+                "n": "type",
+                "v": "protein",
+                "d": "string"
+            },
+            {
+                "po": 21,
+                "n": "type",
+                "v": "protein",
+                "d": "string"
+            },
+            {
+                "po": 22,
+                "n": "type",
+                "v": "protein",
+                "d": "string"
+            },
+            {
+                "po": 23,
+                "n": "type",
+                "v": "proteinfamily",
+                "d": "string"
+            },
+            {
+                "po": 23,
+                "n": "member",
+                "v": [
+                    "hgnc.symbol:TRAF2",
+                    "hgnc.symbol:TRAF3"
+                ],
+                "d": "list_of_string"
+            },
+            {
+                "po": 24,
+                "n": "type",
+                "v": "compartment",
+                "d": "string"
+            },
+            {
+                "po": 24,
+                "n": "member",
+                "v": [
+                    "hgnc.symbol:LTBR",
+                    "hgnc.symbol:TNFR1"
+                ],
+                "d": "list_of_string"
+            },
+            {
+                "po": 25,
+                "n": "type",
+                "v": "protein",
+                "d": "string"
+            },
+            {
+                "po": 26,
+                "n": "type",
+                "v": "compartment",
+                "d": "string"
+            },
+            {
+                "po": 26,
+                "n": "member",
+                "v": [
+                    "hgnc.symbol:DIABLO",
+                    "hgnc.symbol:SMAC"
+                ],
+                "d": "list_of_string"
+            },
+            {
+                "po": 27,
+                "n": "type",
+                "v": "protein",
+                "d": "string"
+            },
+            {
+                "po": 28,
+                "n": "type",
+                "v": "protein",
+                "d": "string"
+            }
+        ]
+    },
+    {
+        "cartesianLayout": [
+            {
+                "node": 0,
+                "x": 1059.0,
+                "y": -51.0
+            },
+            {
+                "node": 1,
+                "x": 480.0,
+                "y": 102.0
+            },
+            {
+                "node": 2,
+                "x": 923.0,
+                "y": 283.0
+            },
+            {
+                "node": 3,
+                "x": 966.0,
+                "y": 102.0
+            },
+            {
+                "node": 4,
+                "x": 296.0,
+                "y": 503.0
+            },
+            {
+                "node": 5,
+                "x": 295.0,
+                "y": 354.0
+            },
+            {
+                "node": 6,
+                "x": 692.0,
+                "y": -51.0
+            },
+            {
+                "node": 7,
+                "x": 856.0,
+                "y": 501.0
+            },
+            {
+                "node": 8,
+                "x": 1430.0,
+                "y": 186.0
+            },
+            {
+                "node": 9,
+                "x": 511.0,
+                "y": -51.0
+            },
+            {
+                "node": 10,
+                "x": 869.0,
+                "y": -51.0
+            },
+            {
+                "node": 11,
+                "x": 527.0,
+                "y": 288.0
+            },
+            {
+                "node": 12,
+                "x": 1366.0,
+                "y": -49.0
+            },
+            {
+                "node": 13,
+                "x": 1240.0,
+                "y": 565.0
+            },
+            {
+                "node": 14,
+                "x": 773.0,
+                "y": 102.0
+            },
+            {
+                "node": 15,
+                "x": 327.0,
+                "y": -51.0
+            },
+            {
+                "node": 16,
+                "x": 1543.0,
+                "y": -52.0
+            },
+            {
+                "node": 17,
+                "x": 584.0,
+                "y": 743.0
+            },
+            {
+                "node": 18,
+                "x": 365.0,
+                "y": 743.0
+            },
+            {
+                "node": 19,
+                "x": 1430.0,
+                "y": 649.0
+            },
+            {
+                "node": 20,
+                "x": 1065.0,
+                "y": 501.0
+            },
+            {
+                "node": 21,
+                "x": 365.0,
+                "y": 649.0
+            },
+            {
+                "node": 22,
+                "x": 584.0,
+                "y": 649.0
+            },
+            {
+                "node": 23,
+                "x": 1454.0,
+                "y": -51.0
+            },
+            {
+                "node": 24,
+                "x": 925.0,
+                "y": 649.0
+            },
+            {
+                "node": 25,
+                "x": 1430.0,
+                "y": 288.0
+            },
+            {
+                "node": 26,
+                "x": 1423.0,
+                "y": 464.0
+            },
+            {
+                "node": 27,
+                "x": 1168.0,
+                "y": 102.0
+            },
+            {
+                "node": 28,
+                "x": 1423.0,
+                "y": 499.0
+            }
+        ]
+    },
+    {
+        "cyVisualProperties": [
+            {
+                "properties_of": "network",
+                "properties": {
+                    "NETWORK_ANNOTATION_SELECTION": "false",
+                    "NETWORK_BACKGROUND_PAINT": "#222233",
+                    "NETWORK_CENTER_X_LOCATION": "0.0",
+                    "NETWORK_CENTER_Y_LOCATION": "0.0",
+                    "NETWORK_CENTER_Z_LOCATION": "0.0",
+                    "NETWORK_DEPTH": "0.0",
+                    "NETWORK_EDGE_SELECTION": "true",
+                    "NETWORK_HEIGHT": "400.0",
+                    "NETWORK_NODE_SELECTION": "true",
+                    "NETWORK_SCALE_FACTOR": "1.0",
+                    "NETWORK_SIZE": "550.0",
+                    "NETWORK_WIDTH": "550.0"
+                }
+            },
+            {
+                "properties_of": "nodes:default",
+                "properties": {
+                    "COMPOUND_NODE_PADDING": "10.0",
+                    "COMPOUND_NODE_SHAPE": "ROUND_RECTANGLE",
+                    "NODE_BORDER_PAINT": "#FF6666",
+                    "NODE_BORDER_STROKE": "SOLID",
+                    "NODE_BORDER_TRANSPARENCY": "255",
+                    "NODE_BORDER_WIDTH": "0.0",
+                    "NODE_CUSTOMGRAPHICS_1": "org.cytoscape.ding.customgraphics.NullCustomGraphics,0,[ Remove Graphics ],",
+                    "NODE_CUSTOMGRAPHICS_2": "org.cytoscape.ding.customgraphics.NullCustomGraphics,0,[ Remove Graphics ],",
+                    "NODE_CUSTOMGRAPHICS_3": "org.cytoscape.ding.customgraphics.NullCustomGraphics,0,[ Remove Graphics ],",
+                    "NODE_CUSTOMGRAPHICS_4": "org.cytoscape.ding.customgraphics.NullCustomGraphics,0,[ Remove Graphics ],",
+                    "NODE_CUSTOMGRAPHICS_5": "org.cytoscape.ding.customgraphics.NullCustomGraphics,0,[ Remove Graphics ],",
+                    "NODE_CUSTOMGRAPHICS_6": "org.cytoscape.ding.customgraphics.NullCustomGraphics,0,[ Remove Graphics ],",
+                    "NODE_CUSTOMGRAPHICS_7": "org.cytoscape.ding.customgraphics.NullCustomGraphics,0,[ Remove Graphics ],",
+                    "NODE_CUSTOMGRAPHICS_8": "org.cytoscape.ding.customgraphics.NullCustomGraphics,0,[ Remove Graphics ],",
+                    "NODE_CUSTOMGRAPHICS_9": "org.cytoscape.ding.customgraphics.NullCustomGraphics,0,[ Remove Graphics ],",
+                    "NODE_CUSTOMGRAPHICS_POSITION_1": "C,C,c,0.00,0.00",
+                    "NODE_CUSTOMGRAPHICS_POSITION_2": "C,C,c,0.00,0.00",
+                    "NODE_CUSTOMGRAPHICS_POSITION_3": "C,C,c,0.00,0.00",
+                    "NODE_CUSTOMGRAPHICS_POSITION_4": "C,C,c,0.00,0.00",
+                    "NODE_CUSTOMGRAPHICS_POSITION_5": "C,C,c,0.00,0.00",
+                    "NODE_CUSTOMGRAPHICS_POSITION_6": "C,C,c,0.00,0.00",
+                    "NODE_CUSTOMGRAPHICS_POSITION_7": "C,C,c,0.00,0.00",
+                    "NODE_CUSTOMGRAPHICS_POSITION_8": "C,C,c,0.00,0.00",
+                    "NODE_CUSTOMGRAPHICS_POSITION_9": "C,C,c,0.00,0.00",
+                    "NODE_CUSTOMGRAPHICS_SIZE_1": "0.0",
+                    "NODE_CUSTOMGRAPHICS_SIZE_2": "0.0",
+                    "NODE_CUSTOMGRAPHICS_SIZE_3": "0.0",
+                    "NODE_CUSTOMGRAPHICS_SIZE_4": "0.0",
+                    "NODE_CUSTOMGRAPHICS_SIZE_5": "0.0",
+                    "NODE_CUSTOMGRAPHICS_SIZE_6": "0.0",
+                    "NODE_CUSTOMGRAPHICS_SIZE_7": "0.0",
+                    "NODE_CUSTOMGRAPHICS_SIZE_8": "0.0",
+                    "NODE_CUSTOMGRAPHICS_SIZE_9": "0.0",
+                    "NODE_CUSTOMPAINT_1": "DefaultVisualizableVisualProperty(id=NODE_CUSTOMPAINT_1, name=Node Custom Paint 1)",
+                    "NODE_CUSTOMPAINT_2": "DefaultVisualizableVisualProperty(id=NODE_CUSTOMPAINT_2, name=Node Custom Paint 2)",
+                    "NODE_CUSTOMPAINT_3": "DefaultVisualizableVisualProperty(id=NODE_CUSTOMPAINT_3, name=Node Custom Paint 3)",
+                    "NODE_CUSTOMPAINT_4": "DefaultVisualizableVisualProperty(id=NODE_CUSTOMPAINT_4, name=Node Custom Paint 4)",
+                    "NODE_CUSTOMPAINT_5": "DefaultVisualizableVisualProperty(id=NODE_CUSTOMPAINT_5, name=Node Custom Paint 5)",
+                    "NODE_CUSTOMPAINT_6": "DefaultVisualizableVisualProperty(id=NODE_CUSTOMPAINT_6, name=Node Custom Paint 6)",
+                    "NODE_CUSTOMPAINT_7": "DefaultVisualizableVisualProperty(id=NODE_CUSTOMPAINT_7, name=Node Custom Paint 7)",
+                    "NODE_CUSTOMPAINT_8": "DefaultVisualizableVisualProperty(id=NODE_CUSTOMPAINT_8, name=Node Custom Paint 8)",
+                    "NODE_CUSTOMPAINT_9": "DefaultVisualizableVisualProperty(id=NODE_CUSTOMPAINT_9, name=Node Custom Paint 9)",
+                    "NODE_DEPTH": "0.0",
+                    "NODE_FILL_COLOR": "#006666",
+                    "NODE_HEIGHT": "70.0",
+                    "NODE_LABEL_COLOR": "#FFFFFF",
+                    "NODE_LABEL_FONT_FACE": "Dialog,plain,12",
+                    "NODE_LABEL_FONT_SIZE": "18",
+                    "NODE_LABEL_POSITION": "C,C,c,0.00,0.00",
+                    "NODE_LABEL_TRANSPARENCY": "255",
+                    "NODE_LABEL_WIDTH": "180.0",
+                    "NODE_NESTED_NETWORK_IMAGE_VISIBLE": "true",
+                    "NODE_PAINT": "#1E90FF",
+                    "NODE_SELECTED": "false",
+                    "NODE_SELECTED_PAINT": "#FF6666",
+                    "NODE_SHAPE": "ELLIPSE",
+                    "NODE_SIZE": "35.0",
+                    "NODE_TRANSPARENCY": "255",
+                    "NODE_VISIBLE": "true",
+                    "NODE_WIDTH": "110.0",
+                    "NODE_X_LOCATION": "0.0",
+                    "NODE_Y_LOCATION": "0.0",
+                    "NODE_Z_LOCATION": "0.0"
+                },
+                "dependencies": {
+                    "nodeCustomGraphicsSizeSync": "true",
+                    "nodeSizeLocked": "false"
+                },
+                "mappings": {
+                    "NODE_BORDER_WIDTH": {
+                        "type": "DISCRETE",
+                        "definition": "COL=querynode,T=boolean,K=0=true,V=0=20.0"
+                    },
+                    "NODE_FILL_COLOR": {
+                        "type": "DISCRETE",
+                        "definition": "COL=type,T=string,K=0=phenotype,V=0=#FFFFFF,K=1=smallmolecule,V=1=#FFFFFF,K=2=complex,V=2=#0099CC,K=3=proteinfamily,V=3=#FFFFFF"
+                    },
+                    "NODE_HEIGHT": {
+                        "type": "DISCRETE",
+                        "definition": "COL=type,T=string,K=0=smallmolecule,V=0=20.0,K=1=complex,V=1=180.0"
+                    },
+                    "NODE_LABEL": {
+                        "type": "PASSTHROUGH",
+                        "definition": "COL=name,T=string"
+                    },
+                    "NODE_LABEL_COLOR": {
+                        "type": "DISCRETE",
+                        "definition": "COL=type,T=string,K=0=proteinfamily,V=0=#999999"
+                    },
+                    "NODE_LABEL_POSITION": {
+                        "type": "DISCRETE",
+                        "definition": "COL=type,T=string,K=0=smallmolecule,V=0=S,,NW,,c,,0.00,,0.00"
+                    },
+                    "NODE_SHAPE": {
+                        "type": "DISCRETE",
+                        "definition": "COL=type,T=string,K=0=phenotype,V=0=OCTAGON,K=1=process,V=1=DIAMOND,K=2=smallmolecule,V=2=OCTAGON,K=3=proteinfamily,V=3=RECTANGLE,K=4=protein,V=4=ROUND_RECTANGLE,K=5=compartment,V=5=TRIANGLE"
+                    },
+                    "NODE_TRANSPARENCY": {
+                        "type": "DISCRETE",
+                        "definition": "COL=type,T=string,K=0=phenotype,V=0=100"
+                    },
+                    "NODE_WIDTH": {
+                        "type": "DISCRETE",
+                        "definition": "COL=type,T=string,K=0=phenotype,V=0=220.0,K=1=smallmolecule,V=1=20.0,K=2=complex,V=2=180.0"
+                    }
+                }
+            },
+            {
+                "properties_of": "edges:default",
+                "properties": {
+                    "EDGE_CURVED": "true",
+                    "EDGE_LABEL_COLOR": "#000000",
+                    "EDGE_LABEL_FONT_FACE": "SansSerif,plain,10",
+                    "EDGE_LABEL_FONT_SIZE": "10",
+                    "EDGE_LABEL_TRANSPARENCY": "255",
+                    "EDGE_LABEL_WIDTH": "200.0",
+                    "EDGE_LINE_TYPE": "SOLID",
+                    "EDGE_PAINT": "#808080",
+                    "EDGE_SELECTED": "false",
+                    "EDGE_SELECTED_PAINT": "#FF0000",
+                    "EDGE_SOURCE_ARROW_SELECTED_PAINT": "#FFFF00",
+                    "EDGE_SOURCE_ARROW_SHAPE": "NONE",
+                    "EDGE_SOURCE_ARROW_SIZE": "6.0",
+                    "EDGE_SOURCE_ARROW_UNSELECTED_PAINT": "#FFFFFF",
+                    "EDGE_STROKE_SELECTED_PAINT": "#FF0000",
+                    "EDGE_STROKE_UNSELECTED_PAINT": "#FFFFFF",
+                    "EDGE_TARGET_ARROW_SELECTED_PAINT": "#FFFF00",
+                    "EDGE_TARGET_ARROW_SHAPE": "NONE",
+                    "EDGE_TARGET_ARROW_SIZE": "6.0",
+                    "EDGE_TARGET_ARROW_UNSELECTED_PAINT": "#000000",
+                    "EDGE_TRANSPARENCY": "100",
+                    "EDGE_UNSELECTED_PAINT": "#FFFFFF",
+                    "EDGE_VISIBLE": "true",
+                    "EDGE_WIDTH": "2.0"
+                },
+                "dependencies": {
+                    "arrowColorMatchesEdge": "true"
+                },
+                "mappings": {
+                    "EDGE_LINE_TYPE": {
+                        "type": "DISCRETE",
+                        "definition": "COL=shared interaction,T=string,K=0=induces,V=0=LONG_DASH,K=1=represses,V=1=LONG_DASH"
+                    },
+                    "EDGE_TARGET_ARROW_SHAPE": {
+                        "type": "DISCRETE",
+                        "definition": "COL=shared interaction,T=string,K=0=induces,V=0=DELTA,K=1=represses,V=1=T,K=2=inhibits,V=2=T,K=3=activates,V=3=DELTA"
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "status": [
+            {
+                "error": "",
+                "success": true
+            }
+        ]
+    }
+]
