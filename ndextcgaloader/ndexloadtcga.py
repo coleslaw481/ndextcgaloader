@@ -45,7 +45,69 @@ POSY_NODE_ATTR = 'POSY'
 POSX_B_NODE_ATTR = 'POSX_B'
 POSY_B_NODE_ATTR = 'POSY_B'
 
+LOAD_PLAN = 'loadplan.json'
+"""
+Name of file containing json load plan
+stored within this package
+"""
 
+STYLE = 'style.cx'
+"""
+Name of file containing CX with style
+stored within this package
+"""
+
+NETWORKSDIR = 'networks'
+"""
+Name of directory where network files will downloaded to
+stored within this package
+"""
+
+NETWORKLISTFILE = 'networks.txt'
+"""
+Name of file containing list of networks to be downloaded
+stored within this package
+"""
+
+
+def get_package_dir():
+    """
+    Gets directory where package is installed
+    :return:
+    """
+    return os.path.dirname(ndextcgaloader.__file__)
+
+def get_load_plan():
+    """
+    Gets the load plan stored with this package
+    :return: path to file
+    :rtype: string
+    """
+    return os.path.join(get_package_dir(), LOAD_PLAN)
+
+def get_style():
+    """
+    Gets the style stored with this package
+    :return: path to file
+    :rtype: string
+    """
+    return os.path.join(get_package_dir(), STYLE)
+
+def get_networksdir():
+    """
+    Gets the networks lsist stored with this package
+    :return: path to file
+    :rtype: string
+    """
+    return os.path.join(get_package_dir(), NETWORKSDIR)
+
+def get_networksfile():
+    """
+    Gets the networks lsist stored with this package
+    :return: path to file
+    :rtype: string
+    """
+    return os.path.join(get_package_dir(), NETWORKLISTFILE)
 
 def _parse_arguments(desc, args):
     """
@@ -83,26 +145,28 @@ def _parse_arguments(desc, args):
                              '-v = ERROR, -vv = WARNING, -vvv = INFO, '
                              '-vvvv = DEBUG, -vvvvv = NOTSET (default no '
                              'logging)')
-#    parser.add_argument('--dataurl', help='Base URL to use to download networks'
-#                                          'listed in --networklistfile file (default ' +
-#                        DEFAULT_URL + ')',
-#                        default=DEFAULT_URL,
-#                        required=True)
+
+    parser.add_argument('--dataurl', help='Base URL to use to download networks from '
+                                          'listed in --networklistfile file (default ' + DEFAULT_URL + ')',
+                        default=DEFAULT_URL)
+
     parser.add_argument('--datadir', help='Directory containing data files in '
-                                          '--networklistfile', default='./networks')
-    parser.add_argument('--loadplan', help='Load plan json file', required=True)
+                                          '--networklistfile', default=get_networksdir())
+
+    parser.add_argument('--loadplan', help='Use alternate load plan file', default=get_load_plan())
+
     parser.add_argument('--networklistfile', help='File containing a list of'
                                                   'file names corresponding'
                                                   'to the networks to download'
-                                                  'from URL set in --dataurl',
-                        required=True)
+                                                  'from URL set in --dataurl',  default=get_networksfile())
+
     parser.add_argument('--style', help='Path to NDEx CX file to use for styling'
-                                        'networks', required=True)
+                                        'networks', default=get_style())
     parser.add_argument('--version', action='version',
                         version=('%(prog)s ' +
                                  ndextcgaloader.__version__))
 
-    parser.add_argument('--tcgaversion', help='Version of NDEx TCGA Networks', required=True)
+    parser.add_argument('--tcgaversion', help='Version of NDEx TCGA Networks', default='1.2')
 
     return parser.parse_args(args)
 
@@ -160,6 +224,7 @@ class NDExNdextcgaloaderLoader(object):
         self._template = None
         self._failed_networks = []
 
+        self._loadplan = None
 
         self._reportdir = 'reports'
 
@@ -169,7 +234,6 @@ class NDExNdextcgaloaderLoader(object):
         self._nested_nodes_file_path = \
             os.path.join(os.path.abspath(self._reportdir), 'nested_nodes.tsv')
 
-        self._networks_in_cx_dir = 'networks_in_cx'
 
     def _parse_config(self):
             """
@@ -501,12 +565,7 @@ class NDExNdextcgaloaderLoader(object):
         network.apply_style_from_network(self._template)
 
         # save network in CX
-        path_to_networks_in_cx = self._networks_in_cx_dir
-        if not os.path.exists(path_to_networks_in_cx):
-            os.makedirs(path_to_networks_in_cx)
-
-        full_network_in_cx_path = os.path.join(path_to_networks_in_cx, network.get_name() + '.cx')
-
+        full_network_in_cx_path = os.path.join(os.path.abspath(self._datadir), network.get_name() + '.cx')
         with open(full_network_in_cx_path, 'w') as f:
             json.dump(network.to_cx(), f, indent=4)
 
@@ -739,8 +798,7 @@ class NDExNdextcgaloaderLoader(object):
         :param file_name:
         :return: tuple (dataframe, node lines list, node fields list)
         """
-        path_to_file = os.path.join(os.path.abspath(self._datadir),
-                                   file_name)
+        path_to_file = os.path.join(os.path.abspath(self._datadir), file_name)
         if os.path.getsize(path_to_file) is 0:
             logger.error('File is empty: ' + path_to_file)
             return None, None, None

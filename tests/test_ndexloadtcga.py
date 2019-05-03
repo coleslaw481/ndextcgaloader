@@ -172,11 +172,7 @@ format=%(asctime)s %(name)-12s %(levelname)-8s %(message)s""")
             #print('t')
 
             res = ndexloadtcga.main(['myprog.py',
-                 '--loadplan',  '../data/loadplan.json',
-                 '--networklistfile', '../data/networks.txt',
-                 '--style', '../data/style.cx',
-                 '--profile', 'ndextcgaloader_dev',
-                 '--datadir', 'networks'])
+                 '--profile', 'ndextcgaloader_dev'])
             self.assertEqual(res, 0)
 
         finally:
