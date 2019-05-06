@@ -64,6 +64,12 @@ Name of directory where network files will downloaded to
 stored within this package
 """
 
+TESTSDIR = 'tests'
+"""
+Name of the test directoryl; used in test_ndexloadtcga.py module
+"""
+
+
 NETWORKLISTFILE = 'networks.txt'
 """
 Name of file containing list of networks to be downloaded
@@ -96,11 +102,23 @@ def get_style():
 
 def get_networksdir():
     """
-    Gets the networks lsist stored with this package
-    :return: path to file
+    Gets the directory where text networks are downloaded, and networks in tsv and cx
+    formats are generated
+    :return: path to dir
     :rtype: string
     """
     return os.path.join(get_package_dir(), NETWORKSDIR)
+
+
+def get_testsdir():
+    """
+    Constructs the testing directory path
+    :return: path to testing dir
+    :rtype: string
+    """
+    _parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+    return os.path.join(_parent_dir, TESTSDIR)
 
 def get_networksfile():
     """
@@ -329,43 +347,6 @@ class NDExNdextcgaloaderLoader(object):
 
         return 0
 
-    def _remove_edges_to_node(self, network, edge_id_list):
-        """
-        Removes edges pointing to node
-        :param network:
-        :param node_id:
-        :return:
-        """
-        for edge_id in edge_id_list:
-            network.remove_edge(edge_id)
-            e_attrib = network.get_edge_attributes(edge_id)
-            if e_attrib is None:
-                continue
-
-            for edge_attrs in e_attrib:
-                network.remove_edge_attribute(edge_attrs['@id'])
-
-    def _remove_nan_nodes(self, network):
-        """
-        Removes nodes named nan and any edges to those nodes
-        :param network:
-        :return: None
-        """
-        edge_id_list = []
-        node_id_list = []
-        for id, node in network.get_nodes():
-            if node['n'] == 'nan':
-                node_id_list.append(id)
-                for edge_id, edge_obj in network.get_edges():
-                    if edge_obj['s'] == id or edge_obj['t'] == id:
-                        edge_id_list.append(edge_id)
-
-        if len(edge_id_list) > 0:
-            self._remove_edges_to_node(network, edge_id_list)
-        if len(node_id_list) > 0:
-            for id in node_id_list:
-                network.remove_node(id)
-
     def _add_coordinates_aspect_from_pos_attributes(self, network):
         """
         Iterates through all nodes in network looking for
@@ -433,8 +414,6 @@ class NDExNdextcgaloaderLoader(object):
         network.set_network_attribute("type", json.dumps(networkType))
 
         network.set_network_attribute("version", self._tcga_version)
-
-
 
     def _report_proteins_with_invalid_names(self, node_df, network_name):
 
@@ -553,7 +532,6 @@ class NDExNdextcgaloaderLoader(object):
                 if not node_resolvable:
                     del node['r']
 
-        self._remove_nan_nodes(network)
         self._add_coordinates_aspect_from_pos_attributes(network)
         network.set_name(os.path.basename(file_name).replace('.txt', ''))
 
