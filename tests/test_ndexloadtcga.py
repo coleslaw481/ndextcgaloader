@@ -20,11 +20,16 @@ class TestNdextcgaloader(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures, if any."""
-        self._networklistfile = '../data/networks.txt'
-        self._loadplan_path   = '../data/loadplan.json'
 
-        self._sample_networks = 'sample_networks_in_cx'
-        self._networks_for_testing = 'networks_in_cx'
+        self._package_dir = ndexloadtcga.get_package_dir()
+        self._networklistfile = ndexloadtcga.get_networksfile()
+        self._loadplan_path = ndexloadtcga.get_load_plan()
+
+
+        self._networks_for_testing = ndexloadtcga.get_networksdir()
+        self._testing_dir = ndexloadtcga.get_testsdir()
+        self._sample_networks_in_tests_dir = os.path.join(self._testing_dir, 'sample_networks_in_cx')
+        pass
 
 
     def tearDown(self):
@@ -130,19 +135,23 @@ format=%(asctime)s %(name)-12s %(levelname)-8s %(message)s""")
         with open(self._loadplan_path, 'r') as f:
             self._loadplan = json.load(f)
 
+        count = 1
         for network_file in list_of_network_files_in_cx:
 
             path_to_network_for_testing = os.path.join(os.path.abspath(self._networks_for_testing), network_file)
             network_for_testing_in_cx = ndex2.create_nice_cx_from_file(path_to_network_for_testing)
 
-            path_to_sample_network = os.path.join(os.path.abspath(self._sample_networks), network_file)
+            path_to_sample_network = os.path.join(self._sample_networks_in_tests_dir, network_file)
+
             network_sample_in_cx = ndex2.create_nice_cx_from_file(path_to_sample_network)
 
             self.validate_network(network_for_testing_in_cx, network_sample_in_cx, network_file)
 
-            print(network_file)
+            print('{}) netwok {} passed'.format(count,  network_file.replace('.cx', '')))
+            count += 1
 
-        pass
+
+
 
 
     def test_main(self):
@@ -160,19 +169,7 @@ format=%(asctime)s %(name)-12s %(levelname)-8s %(message)s""")
             #                                         pw=NDExUtilConfig.PASSWORD,
             #                                         server=NDExUtilConfig.SERVER))
 
-            #res = ndexloadtcga.main(['myprog.py', '--conf',
-            #                                         confile, '--profile',
-            #                                         'hi'])
-
-            # --loadplan ../data/loadplan.json
-            # --networklistfile ../data/networks.txt
-            # --style ../data/style.cx
-            # --profile ndextcgaloader_dev
-            # --datadir ./networks
-            #print('t')
-
-            res = ndexloadtcga.main(['myprog.py',
-                 '--profile', 'ndextcgaloader_dev'])
+            res = ndexloadtcga.main(['myprog.py', '--profile', 'ndextcgaloader'])
             self.assertEqual(res, 0)
 
         finally:
