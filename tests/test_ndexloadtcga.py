@@ -10,9 +10,17 @@ import shutil
 import unittest
 from ndexutil.config import NDExUtilConfig
 from ndextcgaloader import ndexloadtcga
+from ndextcgaloader.ndexloadtcga import NDExNdextcgaloaderLoader
 
 import json
 import ndex2
+
+
+class dotdict(dict):
+    """dot.notation access to dictionary attributes"""
+    __getattr__ = dict.get
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
 
 
 class TestNdextcgaloader(unittest.TestCase):
@@ -28,8 +36,20 @@ class TestNdextcgaloader(unittest.TestCase):
 
         self._networks_for_testing = ndexloadtcga.get_networksdir()
         self._testing_dir = ndexloadtcga.get_testsdir()
-        self._sample_networks_in_tests_dir = os.path.join(self._testing_dir, 'sample_networks_in_cx')
-        pass
+        self._sample_networks_in_tests_dir = os.path.join(self._testing_dir, 'sample_networks')
+
+        self._the_args = {
+            'conf': None,
+            'datadir': ndexloadtcga.get_networksdir(),
+            'dataurl': None,
+            'loadplan': self._loadplan_path,
+            'logconf':  None,
+            'networklistfile': self._networklistfile
+        }
+
+        self._the_args = dotdict(self._the_args)
+
+        self.NDExTCGALoader = NDExNdextcgaloaderLoader(self._the_args)
 
 
     def tearDown(self):
@@ -125,33 +145,6 @@ format=%(asctime)s %(name)-12s %(levelname)-8s %(message)s""")
             self.assertEqual(value, sample_value, 'Nodes attributes are different in ' + file_name)
 
 
-    def test_networks(self):
-
-        with open(self._networklistfile, 'r') as networks:
-            list_of_network_files = networks.read().splitlines()
-            list_of_network_files_in_cx = [network.replace('.txt', '.cx') for network in list_of_network_files]
-
-
-        with open(self._loadplan_path, 'r') as f:
-            self._loadplan = json.load(f)
-
-        count = 1
-        for network_file in list_of_network_files_in_cx:
-
-            path_to_network_for_testing = os.path.join(os.path.abspath(self._networks_for_testing), network_file)
-            network_for_testing_in_cx = ndex2.create_nice_cx_from_file(path_to_network_for_testing)
-
-            path_to_sample_network = os.path.join(self._sample_networks_in_tests_dir, network_file)
-
-            network_sample_in_cx = ndex2.create_nice_cx_from_file(path_to_sample_network)
-
-            self.validate_network(network_for_testing_in_cx, network_sample_in_cx, network_file)
-
-            print('{}) netwok {} passed'.format(count,  network_file.replace('.cx', '')))
-            count += 1
-
-
-
 
 
     def test_main(self):
@@ -169,8 +162,39 @@ format=%(asctime)s %(name)-12s %(levelname)-8s %(message)s""")
             #                                         pw=NDExUtilConfig.PASSWORD,
             #                                         server=NDExUtilConfig.SERVER))
 
-            res = ndexloadtcga.main(['myprog.py', '--profile', 'ndextcgaloader'])
-            self.assertEqual(res, 0)
+            #res = ndexloadtcga.main(['myprog.py', '--profile', 'ndextcgaloader'])
+            #self.assertEqual(res, 0)
+
+            with open(self._networklistfile, 'r') as networks:
+                list_of_network_files = networks.read().splitlines()
+                list_of_network_files_in_cx = [network.replace('.txt', '.cx') for network in list_of_network_files]
+
+            with open(self._loadplan_path, 'r') as f:
+                self._loadplan = json.load(f)
+
+            count = 1
+
+            self.NDExTCGALoader.parse_load_plan()
+            self.NDExTCGALoader.prepare_report_directory()
+
+            for network_file in list_of_network_files:
+                network_file_in_cx = network_file.replace('.txt', '.cx')
+
+                # generate NiceCX from network_file
+                df, network_description, id_to_gene_dict = self.NDExTCGALoader.get_pandas_dataframe(network_file)
+
+                network = self.NDExTCGALoader.generate_nice_cx_from_panda_df(df,
+                                                                network_file, network_description, id_to_gene_dict)
+
+                path_to_sample_network = os.path.join(self._sample_networks_in_tests_dir, network_file_in_cx)
+
+                network_sample_in_cx = ndex2.create_nice_cx_from_file(path_to_sample_network)
+
+                self.validate_network(network, network_sample_in_cx, network_file)
+
+                print('{}) netwok {} passed'.format(count, network_file.replace('.cx', '')))
+                count += 1
+
 
         finally:
             print('done')
