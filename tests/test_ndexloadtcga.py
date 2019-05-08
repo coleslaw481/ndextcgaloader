@@ -40,7 +40,7 @@ class TestNdextcgaloader(unittest.TestCase):
 
         self._the_args = {
             'conf': None,
-            'datadir': ndexloadtcga.get_networksdir(),
+            'datadir': self._sample_networks_in_tests_dir, 
             'dataurl': None,
             'loadplan': self._loadplan_path,
             'logconf':  None,
