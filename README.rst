@@ -26,7 +26,7 @@ Loads TCGA data into NDEx
 Tools
 -----
 
-* **ndexloadtcga.py** -- Loads TCGA into NDEx_
+* **ndexloadtcga.py** - Loads TCGA into NDEx_
 
 Dependencies
 ------------
@@ -42,23 +42,23 @@ Compatibility
 Installation
 ------------
 
-.. code-block::
+.. code-block:: python
 
-   https://github.com/vrynkov/ndextcgaloader.git
+   git clone https://github.com/vrynkov/ndextcgaloader.git
    cd ndextcgaloader
    make dist
    pip install dist/ndextcgaloader*whl
 
 
-Run **make** command with no arguments to see other build/deploy options including creation of Docker image 
+Run **make** command with no arguments to see other build/deploy options including creation of Docker image
 
-.. code-block::
+.. code-block:: python
 
    make
 
 Output:
 
-.. code-block::
+.. code-block:: python
 
    clean                remove all build, test, coverage and Python artifacts
    clean-build          remove build artifacts
@@ -87,42 +87,62 @@ The default path for this configuration is :code:`~/.ndexutils.conf` but can be 
 
 **Format of configuration file**
 
-.. code-block::
+.. code-block:: python
 
     [<value in --profile (default ndextcgaloader)>]
-
     user = <NDEx username>
     password = <NDEx password>
-    server = <NDEx server(omit http) ie public.ndexbio.org>
+    server = <NDEx server(omit http), i.e., public.ndexbio.org>
 
-The NDEx UUID needed for **style** can be obtained by uploading the :code:`style.cx` file found under
-the :code:`data/` directory of this repository. NOTE: The network needs to be uploaded to the same
-server as defined in **style** :code:`public.ndexbio.org` is NDEx_ production. Also the network needs
-to be visible to the **user**
 
-**Example configuration file**
+**Example of a default configuration in ~/.ndexutils.conf:**
 
-.. code-block::
+.. code-block:: python
 
-    [ndextcgaloader_dev]
+    [ndextcgaloader]
     user = joe123
     password = somepassword123
     server = dev.ndexbio.org
+
+To run utility with the above default config, it is suffice to call utility with no arguments:
+
+.. code-block:: python
+
+    ndexloadtcga.py
+
+**Example of configuration for Production in ~/.ndexutils.conf:**
+
+.. code-block:: python
 
     [ndextcgaloader_prod]
     user = joe_p
     password = joes_unbreakable_password
     server = ndexbio.org
 
+To make **ndexloadtcga.py** upload networks to account **joe_p** on **ndexbio.org**, **ndexloadtcga.py** can be called like this:
+
+.. code-block:: python
+
+    ndexloadtcga.py --profile ndextcgaloader_prod
+
+
 Needed files
 ------------
 
-Three files are needed to run this script: **loadplan.json**, **networks.txt** and **style.cx**. These files are located in **data** directory.  They are specified with **--loadplan**, **--networklistfile** and **--style** command-line arguments, accordingly.
+Three files are needed to run this script:
+
+.. code-block:: python
+
+   loadplan.json
+   networks.txt
+   style.cx
+
+These files are located in **data** directory.  They are specified with **--loadplan**, **--networklistfile** and **--style** command-line arguments, accordingly.
 For example:
 
-.. code-block::
+.. code-block:: python
 
-   ndexloadtcga.py --loadplan ./data/loadplan.json --networklistfile ./data/networks.txt --style ./data/style.cx 
+   ndexloadtcga.py --loadplan ./data/loadplan.json --networklistfile ./data/networks.txt --style ./data/style.cx
 
 Usage
 -----
@@ -133,7 +153,7 @@ In addition to the three required files listed in the previous section, we need 
 
 The entire command is thus
 
-.. code-block::
+.. code-block:: python
 
  ndexloadtcga.py --loadplan <loadplan> --networklistfile <networks file> --style <style> --profile <profile> -datadir <datadir>
 
@@ -141,7 +161,7 @@ The entire command is thus
 
 Here is how this command can be run for **dev** and **prod** targets:
 
-.. code-block::
+.. code-block:: python
 
    ndexloadtcga.py --loadplan ./data/loadplan.json --networklistfile ./data/networks.txt --style ./data/style.cx --profile ndextcgaloader_dev --datadir ./networks
 
@@ -157,7 +177,7 @@ Via Docker
 **TODO:** Add information about example usage
 
 
-.. code-block::
+.. code-block:: python
 
    docker run -v `pwd`:`pwd` -w `pwd` coleslawndex/ndextcgaloader:0.1.0 ndexloadtcga.py --conf conf # TODO Add other needed arguments here
 
