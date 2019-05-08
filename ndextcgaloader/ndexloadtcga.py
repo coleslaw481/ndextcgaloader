@@ -226,6 +226,9 @@ class NDExNdextcgaloaderLoader(object):
 
         :param args:
         """
+        if args is None:
+            return
+
         self._conf_file = args.conf
         self._profile = args.profile
 
@@ -264,7 +267,7 @@ class NDExNdextcgaloaderLoader(object):
             self._pass = con.get(self._profile, NDExUtilConfig.PASSWORD)
             self._server = con.get(self._profile, NDExUtilConfig.SERVER)
 
-    def _parse_load_plan(self):
+    def parse_load_plan(self):
         """
 
         :return:
@@ -308,7 +311,7 @@ class NDExNdextcgaloaderLoader(object):
         self._template = ndex2.create_nice_cx_from_file(os.path.abspath(self._args.style))
 
 
-    def _prepare_report_directory(self):
+    def prepare_report_directory(self):
         # create reports directory if it doesn't exist
         if not os.path.exists(self._reportdir):
             os.makedirs(self._reportdir)
@@ -328,12 +331,12 @@ class NDExNdextcgaloaderLoader(object):
         :return:
         """
         self._parse_config()
-        self._parse_load_plan()
+        self.parse_load_plan()
         self._create_ndex_connection()
         self._load_network_summaries_for_user()
         self._load_style_template()
 
-        self._prepare_report_directory()
+        self.prepare_report_directory()
 
 
         with open(self._networklistfile, 'r') as networks:
@@ -489,14 +492,18 @@ class NDExNdextcgaloaderLoader(object):
 
         return nested_nodes_ids
 
-    def _process_file(self, file_name):
+    def save_panda_df_to_tsv(self, df, file_name):
 
-        id_to_gene_dict = {}
-        """Processes  a file"""
-        df, network_description, id_to_gene_dict = self._get_pandas_dataframe(file_name)
-        if df is None:
-            return
+        path_to_file = os.path.join(os.path.abspath(self._datadir), file_name)
+        if os.path.getsize(path_to_file) is 0:
+            logger.error('File is empty: ' + path_to_file)
+            return None
 
+        path_to_tsv_file = path_to_file.replace('.txt', '.tsv')
+        with open(path_to_tsv_file, 'w') as f:
+            f.write(df.to_csv(sep='\t'))
+
+    def generate_nice_cx_from_panda_df(self, df, file_name, network_description, id_to_gene_dict):
         # replace node names with IDs before transforming Panda dataframe to Nice CX;
         # this is done because as of the moment of writing convert_pandas_to_nice_cx_with_load_plan() cannot
         # handle frames with multiple nodes with the same name; so we use unique IDs instead
@@ -507,7 +514,7 @@ class NDExNdextcgaloaderLoader(object):
         network = t2n.convert_pandas_to_nice_cx_with_load_plan(df, self._loadplan)
 
         # now, replace 'name' and 'represents' in network with names;
-        # we only have represents for simple nodes (proteins) whose represetns comply with DExNdextcgaloaderLoader.HGNC_REGEX
+        # we only have represents for simple nodes (proteins) whose represetns comply with NDExNdextcgaloaderLoader.HGNC_REGEX
         for id, node in network.get_nodes():
             node['n'] = id_to_gene_dict[node['n']]
 
@@ -537,16 +544,31 @@ class NDExNdextcgaloaderLoader(object):
 
         self._set_network_attributes(network, network_description)
 
-        network_update_key = self._net_summaries.get(network.get_name().upper())
+        return network
 
-        # apply style to network
-        network.apply_style_from_network(self._template)
-
-        # save network in CX
+    def save_network_in_cx_on_disk(self, network):
         full_network_in_cx_path = os.path.join(os.path.abspath(self._datadir), network.get_name() + '.cx')
         with open(full_network_in_cx_path, 'w') as f:
             json.dump(network.to_cx(), f, indent=4)
 
+
+    def _process_file(self, file_name):
+
+        """Processes  a file"""
+        df, network_description, id_to_gene_dict = self.get_pandas_dataframe(file_name)
+        if df is None:
+            return
+
+        self.save_panda_df_to_tsv(df, file_name)
+
+        network = self.generate_nice_cx_from_panda_df(df, file_name, network_description,id_to_gene_dict)
+
+        # apply style to network
+        network.apply_style_from_network(self._template)
+
+        self.save_network_in_cx_on_disk(network)
+
+        network_update_key = self._net_summaries.get(network.get_name().upper())
 
         if network_update_key is not None:
             return network.update_to(network_update_key, self._server, self._user, self._pass,
@@ -770,12 +792,13 @@ class NDExNdextcgaloaderLoader(object):
 
         return normalized_df_nodes
 
-    def _get_pandas_dataframe(self, file_name):
+    def get_pandas_dataframe(self, file_name):
         """
         Gets pandas data frame from file
         :param file_name:
         :return: tuple (dataframe, node lines list, node fields list)
         """
+
         path_to_file = os.path.join(os.path.abspath(self._datadir), file_name)
         if os.path.getsize(path_to_file) is 0:
             logger.error('File is empty: ' + path_to_file)
@@ -919,7 +942,8 @@ class NDExNdextcgaloaderLoader(object):
             if (pd.isnull(row['EDGE_ID']) or (row['EDGE_ID']=='')):
                 if ((row['NODE_TYPE'] != 'protein') and (row['PARENT_ID'] == '-1')):
 
-                        df_final = df_final.append(row, ignore_index=True)
+                    df_final = df_final.append(row, ignore_index=True)
+
             else:
                 df_final = df_final.append(row, ignore_index=True)
 
@@ -927,12 +951,6 @@ class NDExNdextcgaloaderLoader(object):
         self._create_names_for_unnamed_nodes(df_final, id_to_gene_dict,'NODE_TYPE', 'SOURCE', 'MEMBER', 'NODE_ID')
 
         self._create_names_for_unnamed_nodes(df_final, id_to_gene_dict,'NODE_TYPE_B', 'TARGET', 'MEMBER_B','NODE_ID_B')
-
-        # for debugging this writes the data frame generated to a file
-        # in same directory input tsv files are located
-        path_to_tsv_file = path_to_file.replace('.txt','.tsv')
-        with open(path_to_tsv_file, 'w') as f:
-            f.write(df_final.to_csv(sep='\t'))
 
         return df_final, network_description, id_to_gene_dict
 
@@ -1001,6 +1019,7 @@ def main(args):
 
     try:
         _setup_logging(theargs)
+
         loader = NDExNdextcgaloaderLoader(theargs)
         return loader.run()
     except Exception as e:
