@@ -167,7 +167,7 @@ These files are located in NDEX TCGA Loader installation directory.  They are us
    nested_nodes.tsv
    invalid_protein_names.tsv
 
-``nested_nodes.tsv`` contains list of complex nodes (nodes that are not proteins) that have other complex nodes as members. ``invalid_protein_names.tsv`` contains list of invalid names found in networks.  
+``nested_nodes.tsv`` contains list of complex nodes (nodes that are not proteins) that have other complex nodes as members. ``invalid_protein_names.tsv`` contains list of invalid names found in networks.  These files are provided for information/debugging purpose and can be safely deleted.
 
 
 More information
