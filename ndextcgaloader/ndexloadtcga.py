@@ -417,6 +417,8 @@ class NDExNdextcgaloaderLoader(object):
         network.set_network_attribute("type", json.dumps(networkType))
 
         network.set_network_attribute("version", self._tcga_version)
+        network.set_network_attribute("__normalizationversion", "0.1")
+
 
     def _report_proteins_with_invalid_names(self, node_df, network_name):
 

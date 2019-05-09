@@ -44,7 +44,7 @@ Installation
 
 .. code-block:: python
 
-   git clone https://github.com/vrynkov/ndextcgaloader.git
+   git clone https://github.com/ndexcontent/ndextcgaloader.git
    cd ndextcgaloader
    make dist
    pip install dist/ndextcgaloader*whl
@@ -81,9 +81,9 @@ Output:
 Configuration
 -------------
 
-The **ndexloadtcga.py** requires a configuration file in the following format be created.
-The default path for this configuration is :code:`~/.ndexutils.conf` but can be overridden with
-:code:`--conf` flag.
+The ``ndexloadtcga.py`` requires a configuration file in the following format be created.
+The default path for this configuration is ``~/.ndexutils.conf`` but can be overridden with
+``--conf`` flag.
 
 **Format of configuration file**
 
@@ -95,7 +95,9 @@ The default path for this configuration is :code:`~/.ndexutils.conf` but can be 
     server = <NDEx server(omit http), i.e., public.ndexbio.org>
 
 
-**Example of a default configuration in ~/.ndexutils.conf:**
+**Example of a default configuration for Development server in ~/.ndexutils.conf:**
+
+Default configuration is defined in the section ``[ndextcgaloader]`` :
 
 .. code-block:: python
 
@@ -104,13 +106,8 @@ The default path for this configuration is :code:`~/.ndexutils.conf` but can be 
     password = somepassword123
     server = dev.ndexbio.org
 
-To run utility with the above default config, it is suffice to call utility with no arguments:
 
-.. code-block:: python
-
-    ndexloadtcga.py
-
-**Example of configuration for Production in ~/.ndexutils.conf:**
+**Example of configuration for Production server in ~/.ndexutils.conf:**
 
 .. code-block:: python
 
@@ -119,7 +116,23 @@ To run utility with the above default config, it is suffice to call utility with
     password = joes_unbreakable_password
     server = ndexbio.org
 
-To make **ndexloadtcga.py** upload networks to account **joe_p** on **ndexbio.org**, **ndexloadtcga.py** can be called like this:
+Usage
+-----
+
+**Running with default configuration**
+
+To run utility with the above default config, it is suffice to call utility with no arguments:
+
+.. code-block:: python
+
+    ndexloadtcga.py
+
+This will upload networks to account ``joe123`` on server ``dev.ndexbio.org`` (specified in ``[ndextcgaloader]`` section of ``~/.ndexutils.conf``)
+
+
+**Running with explicitly specified configuration**
+
+To make ``ndexloadtcga.py`` upload networks to account ``joe_p`` on ``ndexbio.org``:
 
 .. code-block:: python
 
@@ -129,7 +142,7 @@ To make **ndexloadtcga.py** upload networks to account **joe_p** on **ndexbio.or
 Needed files
 ------------
 
-Three files are needed to run this script:
+Three files needed to run this script are:
 
 .. code-block:: python
 
@@ -137,36 +150,40 @@ Three files are needed to run this script:
    networks.txt
    style.cx
 
-These files are located in **data** directory.  They are specified with **--loadplan**, **--networklistfile** and **--style** command-line arguments, accordingly.
-For example:
+These files are located in NDEX TCGA Loader installation directory.  They are used by the script by default. Users, however, may want to specify their own loadplan, list of networks or style instead of the provided default ones. To do so, please use ``--loadplan``, ``--networklistfile`` and/or ``--style`` command-line arguments. For example, in order to use your own style defined in ``my_style.cx``:
 
 .. code-block:: python
 
-   ndexloadtcga.py --loadplan ./data/loadplan.json --networklistfile ./data/networks.txt --style ./data/style.cx
+   ndexloadtcga.py --style my_style.cx
 
-Usage
------
 
-For information invoke :code:`ndexloadtcga.py -h`
+``reports`` directory
+---------------------
 
-In addition to the three required files listed in the previous section, we need to configure and specify profile (production or development), and working directory where tsv networks will be created before uploading to the server.
-
-The entire command is thus
+``ndexloadtcga.py`` creates ``reports`` directory with two files in ``tsv`` format:
 
 .. code-block:: python
 
- ndexloadtcga.py --loadplan <loadplan> --networklistfile <networks file> --style <style> --profile <profile> -datadir <datadir>
+   nested_nodes.tsv
+   invalid_protein_names.tsv
 
-**Example usage**
+``nested_nodes.tsv`` contains list of complex nodes (nodes that are not proteins) that have other complex nodes as members. ``invalid_protein_names.tsv`` contains list of invalid names found in networks.  These files are provided for information/debugging purpose and can be safely deleted.
 
-Here is how this command can be run for **dev** and **prod** targets:
+
+More information
+----------------
+
+For more information invoke 
 
 .. code-block:: python
 
-   ndexloadtcga.py --loadplan ./data/loadplan.json --networklistfile ./data/networks.txt --style ./data/style.cx --profile ndextcgaloader_dev --datadir ./networks
+   ndexloadtcga.py -h
 
 
-   ndexloadtcga.py --loadplan ./data/loadplan.json --networklistfile ./data/networks.txt --style ./data/style.cx --profile ndextcgaloader_prod --datadir ./networks
+How ndexloadtcga.py works (briefly)
+-----------------------------------
+This section is for programmers who maintain the script. 
+
 
 
 Via Docker
