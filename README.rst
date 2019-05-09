@@ -81,7 +81,7 @@ Output:
 Configuration
 -------------
 
-The **ndexloadtcga.py** requires a configuration file in the following format be created.
+The ``ndexloadtcga.py`` requires a configuration file in the following format be created.
 The default path for this configuration is ``~/.ndexutils.conf`` but can be overridden with
 ``--conf`` flag.
 
@@ -156,6 +156,20 @@ These files are located in NDEX TCGA Loader installation directory.  They are us
 
    ndexloadtcga.py --style my_style.cx
 
+
+``reports`` directory
+---------------------
+
+``ndexloadtcga.py`` creates ``reports`` directory with two files in ``tsv`` format:
+
+.. code-block:: python
+
+   nested_nodes.tsv
+   invalid_protein_names.tsv
+
+``nested_nodes.tsv`` contains list of complex nodes (nodes that are not proteins) that have other complex nodes as members. ``invalid_protein_names.tsv`` contains list of invalid names found in networks.  
+
+
 More information
 ----------------
 
@@ -164,6 +178,12 @@ For more information invoke
 .. code-block:: python
 
    ndexloadtcga.py -h
+
+
+How ndexloadtcga.py works (briefly)
+-----------------------------------
+This section is for programmers who maintain the script. 
+
 
 
 Via Docker
