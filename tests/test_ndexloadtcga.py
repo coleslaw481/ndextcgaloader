@@ -192,7 +192,7 @@ format=%(asctime)s %(name)-12s %(levelname)-8s %(message)s""")
 
                 self.validate_network(network, network_sample_in_cx, network_file_in_cx)
 
-                print('{}) netwok {} passed'.format(count, network_file))
+                print('{}) network {} passed'.format(count, network_file.replace('.txt', '')))
                 count += 1
 
 
