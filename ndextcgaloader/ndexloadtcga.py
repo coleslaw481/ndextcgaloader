@@ -33,7 +33,7 @@ DEFAULT_URL_HUMAN = 'https://github.com/iVis-at-Bilkent/pathway-mapper/tree/mast
 NODE_TYPE_MAPPING = {'GENE': 'protein',
                      'FAMILY': 'proteinfamily',
                      'COMPLEX': 'complex',
-                     'PROCESS': 'process', # PROCESS is not in vocabulary, so we keep it as is
+                     'PROCESS': 'biologicalprocess', # PROCESS is not in vocabulary, so we keep it as is
                      'COMPARTMENT': 'compartment' # COMPARTMENT is not in vocabulary, so we keep it as is
                      }
 

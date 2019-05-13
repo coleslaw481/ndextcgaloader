@@ -40,7 +40,7 @@ class TestNdextcgaloader(unittest.TestCase):
 
         self._the_args = {
             'conf': None,
-            'datadir': self._sample_networks_in_tests_dir, 
+            'datadir': self._sample_networks_in_tests_dir,
             'dataurl': None,
             'loadplan': self._loadplan_path,
             'logconf':  None,
@@ -190,9 +190,9 @@ format=%(asctime)s %(name)-12s %(levelname)-8s %(message)s""")
 
                 network_sample_in_cx = ndex2.create_nice_cx_from_file(path_to_sample_network)
 
-                self.validate_network(network, network_sample_in_cx, network_file)
+                self.validate_network(network, network_sample_in_cx, network_file_in_cx)
 
-                print('{}) netwok {} passed'.format(count, network_file.replace('.cx', '')))
+                print('{}) network {} passed'.format(count, network_file.replace('.txt', '')))
                 count += 1
 
 
