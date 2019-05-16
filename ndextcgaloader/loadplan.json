@@ -1,4 +1,7 @@
 {
+    "context": {
+        "hgnc.symbol": "http://identifiers.org/hgnc.symbol/"
+    },
     "source_plan":
     {
         "node_name_column": "SOURCE",
