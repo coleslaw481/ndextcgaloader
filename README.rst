@@ -175,11 +175,6 @@ For more information invoke
    ndexloadtcga.py -h
 
 
-How ndexloadtcga.py works (briefly)
------------------------------------
-This section is for programmers who maintain the script. 
-
-
 
 Via Docker
 ~~~~~~~~~~~~~~~~~~~~~~
