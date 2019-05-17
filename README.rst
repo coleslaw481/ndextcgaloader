@@ -21,7 +21,7 @@ Python application that loads TCGA networks into NDEx_
 
 **3\)** the files are downloaded to a directory specified by ``--datadir`` argument (default is network in ndextcgaloader installation directory). Downloaded text files are then transformed into TSV and to CX formats,  and networks in CX are then uploaded to the NDEx server
 
-**4\)** to connect to NDEx server and upload generated in CX format networks, a configuration file must be passed with ``--conf`` parameter. If`` --conf`` is not specified, the configuration ``~/{confname}`` is examined.
+**4\)** to connect to NDEx server and upload generated in CX format networks, a configuration file must be passed with ``--conf`` parameter. If ``--conf`` is not specified, the configuration ``~/{confname}`` is examined.
 
 Dependencies
 ------------
