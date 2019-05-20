@@ -13,20 +13,15 @@ NDEx TCGA Content Loader
         :target: https://ndextcgaloader.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
+Python application that loads TCGA networks into NDEx_
 
+**1\)** downloads network files in text format from server specified by ``--dataurl`` argument (default is `https://github.com/iVis-at-Bilkent/pathway-mapper/tree/master/samples <https://github.com/iVis-at-Bilkent/pathway-mapper/tree/master/samples>`_)
 
+**2\)** the list of files to be downloaded is specified by ``--networklistfille`` argument (default is ``networks.txt`` that comes with the distribution of this utility)
 
-Loads TCGA data into NDEx
+**3\)** the files are downloaded to a directory specified by ``--datadir`` argument (default is ``network`` in ndextcgaloader installation directory). Downloaded text files are then transformed into ``TSV`` and further to ``CX`` formats,  and networks in ``CX`` are then uploaded to the NDEx server
 
-
-* Free software: BSD license
-* Documentation: https://ndextcgaloader.readthedocs.io.
-
-
-Tools
------
-
-* **ndexloadtcga.py** - Loads TCGA into NDEx_
+**4\)** to connect to NDEx server and upload generated in CX format networks, a configuration file must be passed with ``--conf`` parameter. If ``--conf`` is not specified, the configuration ``~/{confname}`` is examined.
 
 Dependencies
 ------------
@@ -178,11 +173,6 @@ For more information invoke
 .. code-block:: python
 
    ndexloadtcga.py -h
-
-
-How ndexloadtcga.py works (briefly)
------------------------------------
-This section is for programmers who maintain the script. 
 
 
 
