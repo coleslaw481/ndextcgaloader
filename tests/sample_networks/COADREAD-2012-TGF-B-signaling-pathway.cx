@@ -16,14 +16,6 @@
                 "properties": []
             },
             {
-                "name": "@context",
-                "elementCount": 1,
-                "idCounter": 1,
-                "version": "1.0",
-                "consistencyGroup": 1,
-                "properties": []
-            },
-            {
                 "name": "nodes",
                 "elementCount": 10,
                 "idCounter": 10,
@@ -60,19 +52,6 @@
                 "elementCount": 10,
                 "idCounter": 11,
                 "properties": []
-            }
-        ]
-    },
-    {
-        "@context": [
-            {
-                "pubmed": "http://identifiers.org/pubmed/",
-                "chebi": "http://identifiers.org/chebi/CHEBI:",
-                "uniprot": "http://identifiers.org/uniprot/",
-                "cas": "http://identifiers.org/cas/",
-                "kegg.compound": "http://identifiers.org/kegg.compound/",
-                "hprd": "http://identifiers.org/hprd/",
-                "hgnc": "http://identifiers.org/hgnc.symbol/"
             }
         ]
     },
@@ -176,6 +155,10 @@
     {
         "networkAttributes": [
             {
+                "n": "@context",
+                "v": "{\"hgnc.symbol\": \"http://identifiers.org/hgnc.symbol/\"}"
+            },
+            {
                 "n": "name",
                 "v": "COADREAD-2012-TGF-B-signaling-pathway",
                 "d": "string"
@@ -203,10 +186,6 @@
             {
                 "n": "version",
                 "v": "1.0"
-            },
-            {
-                "n": "__normalizationversion",
-                "v": "0.1"
             }
         ]
     },
@@ -246,25 +225,25 @@
             {
                 "po": 2,
                 "n": "type",
-                "v": "protein",
+                "v": "gene",
                 "d": "string"
             },
             {
                 "po": 3,
                 "n": "type",
-                "v": "protein",
+                "v": "gene",
                 "d": "string"
             },
             {
                 "po": 4,
                 "n": "type",
-                "v": "protein",
+                "v": "gene",
                 "d": "string"
             },
             {
                 "po": 5,
                 "n": "type",
-                "v": "protein",
+                "v": "gene",
                 "d": "string"
             },
             {
@@ -285,19 +264,19 @@
             {
                 "po": 7,
                 "n": "type",
-                "v": "protein",
+                "v": "gene",
                 "d": "string"
             },
             {
                 "po": 8,
                 "n": "type",
-                "v": "protein",
+                "v": "gene",
                 "d": "string"
             },
             {
                 "po": 9,
                 "n": "type",
-                "v": "protein",
+                "v": "gene",
                 "d": "string"
             }
         ]
@@ -512,8 +491,8 @@
                     "EDGE_TARGET_ARROW_SHAPE": "NONE",
                     "EDGE_TARGET_ARROW_SIZE": "6.0",
                     "EDGE_TARGET_ARROW_UNSELECTED_PAINT": "#000000",
-                    "EDGE_TRANSPARENCY": "100",
-                    "EDGE_UNSELECTED_PAINT": "#404040",
+                    "EDGE_TRANSPARENCY": "255",
+                    "EDGE_UNSELECTED_PAINT": "#CCCCCC",
                     "EDGE_VISIBLE": "true",
                     "EDGE_WIDTH": "1.0"
                 },
@@ -523,11 +502,11 @@
                 "mappings": {
                     "EDGE_LINE_TYPE": {
                         "type": "DISCRETE",
-                        "definition": "COL=interaction,T=string,K=0=induces,V=0=LONG_DASH,K=1=binds,V=1=SOLID,K=2=represses,V=2=LONG_DASH,K=3=inhibits,V=3=SOLID,K=4=activates,V=4=SOLID"
+                        "definition": "COL=shared interaction,T=string,K=0=induces,V=0=LONG_DASH,K=1=binds,V=1=SOLID,K=2=represses,V=2=LONG_DASH,K=3=inhibits,V=3=SOLID,K=4=activates,V=4=SOLID"
                     },
                     "EDGE_TARGET_ARROW_SHAPE": {
                         "type": "DISCRETE",
-                        "definition": "COL=interaction,T=string,K=0=induces,V=0=DELTA,K=1=represses,V=1=T,K=2=inhibits,V=2=T,K=3=activates,V=3=DELTA"
+                        "definition": "COL=shared interaction,T=string,K=0=induces,V=0=DELTA,K=1=represses,V=1=T,K=2=inhibits,V=2=T,K=3=activates,V=3=DELTA"
                     }
                 }
             }

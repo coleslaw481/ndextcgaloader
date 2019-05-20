@@ -30,7 +30,7 @@ DEFAULT_URL_HUMAN = 'https://github.com/iVis-at-Bilkent/pathway-mapper/tree/mast
 
 # Simple dictionary mapping values in type field to
 # normalized values
-NODE_TYPE_MAPPING = {'GENE': 'protein',
+NODE_TYPE_MAPPING = {'GENE': 'gene',
                      'FAMILY': 'proteinfamily',
                      'COMPLEX': 'complex',
                      'PROCESS': 'biologicalprocess', # PROCESS is not in vocabulary, so we keep it as is
@@ -515,7 +515,7 @@ class NDExNdextcgaloaderLoader(object):
         network = t2n.convert_pandas_to_nice_cx_with_load_plan(df, self._loadplan)
 
         # now, replace 'name' and 'represents' in network with names;
-        # we only have represents for simple nodes (proteins) whose represetns comply with NDExNdextcgaloaderLoader.HGNC_REGEX
+        # we only have represents for simple nodes (genes) whose represetns comply with NDExNdextcgaloaderLoader.HGNC_REGEX
         for id, node in network.get_nodes():
             node['n'] = id_to_gene_dict[node['n']]
 
@@ -528,8 +528,8 @@ class NDExNdextcgaloaderLoader(object):
 
                 for attr in nodeAttributes:
 
-                    if attr['v'] == 'protein':
-                        # only simple nodes, i.e. proteins can be  resolvable
+                    if attr['v'] == 'gene':
+                        # only simple nodes, i.e. genes can be  resolvable
 
                         if re.match(NDExNdextcgaloaderLoader.HGNC_REGEX, id_to_gene_dict[node['r']]):
                             node['r'] = 'hgnc.symbol:' + id_to_gene_dict[node['r']]
@@ -931,7 +931,7 @@ class NDExNdextcgaloaderLoader(object):
         # now, we remove all nodes that have no edges, or in other words, remove all edges from dataframe that
         # have no Edge Id
         # however, we want to keep nodes that have no edges but
-        #    1) (have NODE_TYPE != protein, and PARENT_ID is -1)
+        #    1) (have NODE_TYPE != gene, and PARENT_ID is -1)
         #
         # These nodes represent unrelated to nothing processes (for example, p53/p21 in
         #  BRCA-2012-Cell-cycle-signaling-pathway) and we need to keep them.
@@ -941,7 +941,7 @@ class NDExNdextcgaloaderLoader(object):
         df_final = pd.DataFrame()
         for index, row in df_with_a_b.iterrows():
             if (pd.isnull(row['EDGE_ID']) or (row['EDGE_ID']=='')):
-                if ((row['NODE_TYPE'] != 'protein') and (row['PARENT_ID'] == '-1')):
+                if ((row['NODE_TYPE'] != 'gene') and (row['PARENT_ID'] == '-1')):
 
                     df_final = df_final.append(row, ignore_index=True)
 
@@ -965,24 +965,25 @@ def main(args):
     desc = """
     Version {version}
 
-    Loads NDEx TCGA Content Loader data into NDEx (http://ndexbio.org):
+    Loads TCGA networks into NDEx (http://ndexbio.org):
 
     1) downloads network files in text format from server specified by --dataurl argument
     (default is https://github.com/iVis-at-Bilkent/pathway-mapper/tree/master/samples)
+
     2) the list of files to be downloaded is specified by --networklistfille argument
     (default is networks.txt that comes with the distribution of this utility)
+
     3) the files are downloaded to a directory specified by --datadir argument
     (default is network in ndextcgaloader installation directory). Downloaded text files
-    are then transformed into TSV and to CX formats and are uploaded
+    are then transformed into TSV and to CX formats, and networks in CX are then uploaded
     to the NDEx server
+
     4) to connect to NDEx server and upload generated in CX format networks, a configuration file must be passed
     with --conf parameter. If --conf is not specified, the configuration ~/{confname} is examined.
-
 
     The configuration file should be formatted as follows:
 
     [<value in --profile (default ndextcgaloader)>]
-
     {user} = <NDEx username>
     {password} = <NDEx password>
     {server} = <NDEx server(omit http), i.e., public.ndexbio.org>
@@ -1008,6 +1009,15 @@ def main(args):
     To make ndexloadtcga upload networks to account rudi on ndexbio.org, ndexloadtcga.py can be called like this:
 
     ndexloadtcga.py --profile ndextcgaloader_prod
+
+    5) ndexloadtcga.py creates reports directory with two files in tsv format:
+
+    nested_nodes.tsv
+    invalid_protein_names.tsv
+
+    nested_nodes.tsv contains list of complex nodes (nodes that are not proteins) that have other complex nodes as
+    members. invalid_protein_names.tsv contains list of invalid names found in networks. These files are provided
+    for information/debugging purpose and can be safely deleted.
 
     """.format(confname=NDExUtilConfig.CONFIG_FILE,
                user=NDExUtilConfig.USER,
